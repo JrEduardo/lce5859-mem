@@ -1,0 +1,882 @@
+---
+title: 'Lista de Exercícios'
+academic: Eduardo Elias Ribeiro Junior
+email: 'edujrrib@gmail.com'
+chair: LCE5859 - Métodos Estatísticos Multivariados
+institute: 'Escola Superior de Agricultura Luiz de Queiroz - USP'
+date: '\today'
+logo: "configs/logo-esalq.png"
+bibliography: lce5859-mem.bib
+csl: configs/abntcite.csl
+output:
+  pdf_document:
+    template: configs/template.tex
+    keep_tex: false
+---
+
+Resolução dos exercícios propostos durante a disciplina LCE5859 -
+Métodos Estatísticos Multivariados, ministrada pelo professor
+[Carlos Tadeu dos Santos Dias][carlos] pelo Programa de Pós-Graduação em
+Estatística e Experimentação Agronômica da ESALQ-USP como curso de
+verão. Os exercícios são descritos no livro _Métodos Estatísticos
+Multivariados: uma introdução_ [@Manly2008], que também é adotado como
+livro-texto na disciplina. Todas as análises presentes nesse documento
+são realizadas com o software R [@Rcore2016] e estão disponíveis (texto
+e códigos) no endereço <https://github.com/jreduardo/lce5859-mem>. Os
+dados utilizados foram carregados do pacote `labestData`
+[@labestData2016], que mantém digitado e documentado todos os dados
+presentes no livro-texto.
+
+\vspace{3cm}
+\tableofcontents
+\pagebreak
+
+```{r, include=FALSE}
+
+##----------------------------------------------------------------------
+## Reports
+library(knitr)
+library(xtable)
+opts_chunk$set(
+    warning = FALSE,
+    message = FALSE,
+    cache = FALSE,
+    echo = FALSE,
+    results = "hide",
+    fig.width = 7,
+    fig.height = 5,
+    fig.align = "center",
+    fig.pos = "H",
+    out.width = "1\\textwidth",
+    dev.args = list(
+        family = "Palatino")
+    )
+options(
+    xtable.comment = FALSE,
+    xtable.caption.placement = "top"
+)
+
+##----------------------------------------------------------------------
+## Load packages
+
+library(labestData)         ## Datas
+library(reshape2)           ## Manipule data
+library(plyr)               ## Manipule data
+
+## For graphics
+library(lattice)
+library(latticeExtra)
+source("configs/setup.R")
+cols <- trellis.par.get("superpose.line")$col
+
+```
+
+# Testes de Significância com Dados Multivariados
+
+```{r}
+
+##======================================================================
+## Exercise chapter 4
+##======================================================================
+
+##----------------------------------------------------------------------
+## Packages
+library(car)
+
+##----------------------------------------------------------------------
+## Functions
+
+## Modify print Manova function for exibe table tests
+outtests <- car:::print.Anova.mlm
+body(outtests)[[16]] <- quote(invisible(tests))
+body(outtests)[[15]] <- NULL
+
+## Modify print LinearHypothesis function for exibe table tests
+outcontrasts <- car:::print.linearHypothesis.mlm
+body(outcontrasts)[[21]] <- quote(invisible(tests))
+body(outcontrasts)[[22]] <- NULL
+
+##----------------------------------------------------------------------
+## Load and organize data
+## help(ManlyTb4.5, h = "html")
+da <- transform(ManlyTb4.5, sexo = factor(sexo))
+levels(da$grup) <- c("Modernos", "Pré-históricos",
+                     "Chacais", "Cuons", "Indianos")
+da$grup <- relevel(da$grup, ref = "Pré-históricos")
+levels(da$sexo) <- c("Desconhecido", "Macho", "Fêmea")
+
+```
+
+Esse exercício refere-se à aplicação dos métodos apresentados no
+capítulo 4 do livro-texto. O conjunto de dados disponibilizado diz
+respeito à comparação entre cães pré-históricos da Tailândia e outros
+quatro grupos de animais (cães modernos da Tailândia, chacais dourados,
+cuons e lobos indianos) em termos de nove medidas de mandíbula:
+
+ * $X_1$ Comprimento da mandíbula (mm).
+ * $X_2$ Largura da mandíbula, abaixo do primeiro molar (mm).
+ * $X_3$ Largura do côndilo aricular (mm).
+ * $X_4$ Altura da mandíbula, abaixo do primeiro molar (mm).
+ * $X_5$ Comprimento do primeiro molar (mm).
+ * $X_6$ Largura do primeiro molar (mm).
+ * $X_7$ Comprimento do primeiro ao terceiro molar (mm).
+ * $X_8$ Comprimento do primeiro ao quarto pré-molar (mm).
+ * $X_9$ Largura do canino inferior (mm).
+
+Por simplicidade iremos considere a abreviação Pré-históricos, Modernos,
+Chacais, Cuons e Indianos para os grupos cães pré-históricos da
+Tailândia, cães modernos da Tailândia, chacais dourados, cuons e lobos
+indianos respectivamente.
+
+Nesse conjunto de dados há também a informação sobre o sexo de todos os
+cães, exceto os pré-históricos. Foram avaliados `r nrow(da)` cães, cujo
+10 pertenciam ao grupo dos cães Pré-históricos, 16 ao grupo dos cães
+Modernos, 20 ao grupo dos cães Chacais, 17 ao grupo dos cães Cuons e 14
+ao grupo cães Indianos. Na \autoref{fig:box-dist} são apresentados o
+comportamento das 9 medidas de mandíbulas para cada grupo canino (à
+esquerda) e a matriz de distâncias multivariadas (à direita). Observe
+que a distribuição marginal empírica das variáveis $X_i$,
+$i=1,2,\ldots,9$ difere em cada grupo canino tanto em posição (medianas
+diferentes) quanto em dispersão (amplitudes diferentes). No gráfico à
+direita são exibidas as distâncias entre os vetores médios dos grupos
+caninos, calculadas como
+\begin{equation}
+    \label{eqn:euclidean-dist}
+    d(i, j) = \sqrt{\sum_{k=1}^{9}(\bar{x}_{ki}-\bar{x}_{kj})^2}
+\end{equation}
+sendo $\bar{x}_{ki}$ a média da k-ésima medida para o i-ésimo grupo, i e
+j variam de 1 a 5 conforme os cinco grupos caninos. Portanto $d(i, j)$
+representa a distância multivariada entre os grupos caninos $i$ e $j$ em
+mm. Observa-se que a maior diferença entre os vetores médios se dá entre
+os grupos Chacais e Indianos, enquanto que a menor se dá entre
+Pré-históricos e Modernos.
+
+```{r box-dist, fig.height=4.5, fig.width = 10, fig.cap="Box-plots das nove medidas de mandíbula para cada grupo canino (esquerda) e matriz de distâncias multivariadas entre os grupos caninos (direita)."}
+
+##----------------------------------------------------------------------
+## Descriptive analysis
+
+## Boxplot data
+da_long <- melt(da[,-11], id.vars = "grup")
+codvars <- parse(text = paste0("X[", seq(ncol(da)-2), "]"))
+xy1 <- bwplot(value ~ grup | variable,
+              axis = axis.grid,
+              data = da_long,
+              as.table = TRUE,
+              layout = c(3, 3),
+              ylab = "",
+              scales = list(x = list(rot = 30), y = "free"),
+              strip = strip.custom(
+                  factor.levels = codvars)
+              )
+
+## Means distance matrix visualization
+da_means <- sapply(da[, -c(1, 11)], function(x) {
+    tapply(x, da$grup, mean)
+})
+xy2 <- levelplot(as.matrix(dist(da_means)),
+                 xlab = "",
+                 ylab = "",
+                 scales = list(x = list(rot = 30)),
+                 panel = function(x, y, z, ...) {
+                     ## print(as.list(...))
+                     panel.levelplot(x, y, z, ...)
+                     panel.text(x, y, round(z, 2))
+                 })
+
+## Visualization
+print(xy1, split = c(1, 1, 2, 1), more = TRUE)
+print(xy2, split = c(2, 1, 2, 1), more = FALSE)
+
+```
+
+Um dos interesses levantados sobre esse estudo é em testar as diferenças
+entre os vetores médios dos grupos caninos a fim de identificar,
+principalmente se há diferenças entre os cães Pré-histórios e os
+demais. Uma representação do perfil médio de cada grupo canino é
+apresentada na \autoref{fig:stars} em forma de gráficos de radar onde a
+magnitude da média de cada medida é apresentada de forma conjunta para
+cada grupo, essa é uma forma alternativa aos gráficos-estrela descritos
+em @Manly2008 [capítulo 3]. A leitura dessa figura é análoga a leitura
+da representação da matriz de distâncias na \autoref{fig:box-dist}.
+
+```{r stars, fig.height=3, fig.width=9, fig.cap="Gráficos-radar representando as médias de cada medida da mandíbula para cada grupo canino."}
+
+## Star graph
+stars(da_means,
+      draw.segments = TRUE,
+      nrow = 1,
+      col.segments = cols,
+      ## key.labels = codvars,
+      ## key.loc = c(8.7, 3.2),
+      flip.labels = FALSE,
+      radius = FALSE,
+      frame.plot = TRUE## ,
+      ## mar = c(1, 1, 2, 1)
+      )
+par(xpd = TRUE)
+## polygon(c(1, 1, 10, 10), c(6, 0.5, 0.5, 6))
+legend("top", codvars, fill = cols,
+       horiz = TRUE, bty = "n", inset = -0.1)
+
+```
+
+O método para comparação entre vetores médios quando se tem mais de duas
+amostras é denominado MANOVA (_Multivariate Analysis of Variance_) e o
+teste de significância para $H_0$: $\underline{\mu_i} = \underline{\mu_j}$
+$\forall\, i \neq j$ pode ser realizado via diferentes estatísticas . Nesse
+trabalho consideramos as estatísticas Traço de Pillai-Bartlett, Traço de
+Hotelling-Lawley, Lambda de Wilks e Raiz máxima de Roy conforme descrito
+em @Fox2011.
+
+```{r, results="asis"}
+
+##----------------------------------------------------------------------
+## Multivariate analysis of variance
+
+model <- lm(cbind(compm, largmapm, largca, altmapm, comppm, largpm,
+                  compptm, comppqp, largci) ~ grup, data = da)
+
+## Global statistical tests
+mtests <- c("Pillai", "Wilks", "Hotelling-Lawley", "Roy")
+tab_global <- do.call(rbind, lapply(mtests, function(i) {
+    x <- outtests(Anova(model, test.statistic = i))
+    class(x) <- "data.frame"
+    x
+}))
+rownames(tab_global) <- mtests
+
+## Resultados em formato de tabela Latex
+cap <- c("Tabela de análise de variância multivariada global (MANOVA)")
+print(xtable(tab_global, digits = c(0, 0, 4, 4, 0, 2, -3),
+             caption = cap,
+             label = "tab:manova")
+      )
+
+```
+
+```{r}
+
+## Linear Hypothesis Tests (contrasts)
+HM <- cbind(0, -1 * diag(4))
+tab_contr <- do.call(rbind, lapply(seq(nrow(HM)), function(i) {
+    x <- outcontrasts(
+        linearHypothesis(model, hypothesis.matrix = HM[i, ]))
+    class(x) <- "data.frame"
+    x
+}))
+tab_contr$Statistic <- rep(mtests, nrow(HM))
+tab_contr$Contrast <- do.call(
+    "c", strsplit(paste(
+             paste("\\underline{Pré-Históricos = ",
+                   levels(da$grup)[-1]), "};;;;"), ";"))
+
+```
+
+```{r, results="asis"}
+
+cap <- c("Tabela de contrastes multivariados")
+print(xtable(tab_contr[c(8, 7, 1:6)],
+             digits = c(0, 0, 0, 0, 4, 4, 0, 2, -3),
+             caption = cap,
+             label = "tab:contrasts"),
+      include.rownames = FALSE,
+      sanitize.text.function = identity)
+
+```
+
+```{r, fig.height=5, fig.width=10}
+
+##----------------------------------------------------------------------
+## Comparação das distribuições das 9 variáveis entre os caes
+## tailandeses
+subda_long <- droplevels(
+    subset(da_long, grup %in% c("Pré-históricos", "Modernos")))
+
+## Distribuições empíricas das variaveis
+xy1 <- densityplot(~value | variable,
+                   data = subda_long,
+                   scales = "free",
+                   groups = grup,
+                   axis = axis.grid,
+                   as.table = TRUE,
+                   layout = c(3, 3),
+                   auto.key = TRUE,
+                   xlab = "",
+                   strip = strip.custom(
+                       factor.levels = codvars)
+                   )
+
+## Gráfico do perfil mediano
+##   - Ordenando as variaveis
+ordvar <- order(aggregate(value ~ variable, subda_long, mean)[["value"]])
+subda_long$variable <- ordered(subda_long$variable,
+                               levels =
+                                   levels(da_long$variable)[ordvar])
+
+gap <- 0.15; widt <- 0.2
+xy2 <- bwplot(value ~ variable,
+              data = subda_long,
+              axis = axis.grid,
+              xlab = "Variáveis",
+              ylab = "Valores Observados",
+              scales = list(x = list(labels = codvars[ordvar])),
+              subset = grup == "Modernos",
+              horizontal = FALSE,
+              box.width = widt,
+              fill = cols[1],
+              col = cols[1],
+              alpha = 0.5,
+              panel = function(x, y, subscripts, ...) {
+                  panel.xyplot(x = as.integer(x) - gap, y,
+                               type = "a", ...)
+                  panel.bwplot(x = as.integer(x) + gap, y = y, ...)
+              }) +
+    as.layer(
+        bwplot(value ~ variable,
+               data = subda_long,
+               subset = grup == "Pré-históricos",
+               horizontal = FALSE,
+               box.width = widt,
+               fill = cols[2],
+               col = cols[2],
+               alpha = 0.5,
+               panel = function(x, y, subscripts, ...) {
+                   panel.xyplot(x = as.integer(x) - gap, y,
+                                type = "a", ...)
+                   panel.bwplot(x = as.integer(x) - gap, y = y, ...)
+               })
+    )
+
+## Visualization
+print(xy1, split = c(1, 1, 2, 1), more = TRUE)
+print(xy2, split = c(2, 1, 2, 1), more = FALSE)
+
+```
+
+
+\pagebreak
+
+# Medindo e Testando Distâncias Multivariadas
+
+```{r, include=FALSE}
+
+##======================================================================
+## Exercise chapter 5
+##======================================================================
+
+##----------------------------------------------------------------------
+## Packages
+library(biotools)
+
+##----------------------------------------------------------------------
+## Functions
+
+## Distance matrix for proportion data
+pdist <- function(x, diag = FALSE, upper = FALSE) {
+    n <- nrow(x)
+    aux <- t(combn(n, 2))
+    out <- apply(aux, 1, function(ind) {
+        sum(abs(x[ind[1], ] - x[ind[2], ]))
+    })
+    attr(out, "class") <- "dist"
+    attr(out, "Size") <- n
+    attr(out, "Diag") <- diag
+    attr(out, "Upper") <- upper
+    attr(out, "method") <- "euclidean"
+    return(out)
+}
+
+##----------------------------------------------------------------------
+## Load and organize data
+## help(ManlyTb1.3, h = "html")
+da <- ManlyTb1.3
+
+## Define ambiental and genetics variables
+ambvars <- c("alt", "precip", "tempmax", "tempmin")
+genvars <- c("dg0.4", "dg0.6", "dg0.8", "dg1", "dg1.16", "dg1.3")
+
+da[, ambvars] <- scale(da[, ambvars])
+da[, genvars] <- da[, genvars] / 100
+
+```
+
+Esse exercício é descrito ao final do capítulo 5 do livro-texto, onde
+propõe-se a análise de um conjunto de dados que traz o registro de 4
+variáveis ambientais e de proporções gênicas de _Fósforo
+Glucose-Isomerase_ (Pgi) para 6 diferentes tipos genéticos de Pgi. Os
+registrados foram feitos em `r nrow(da)` colônias de borboletas
+_Euphydryas editha_ na Califórnia e Oregon. Uma breve descrição das
+variáveis é realizada abaixo:
+
+* Variáveis ambientais:
+    - $X_{A1}$: Altitude (pés);
+    - $X_{A2}$: Precipitação anual (polegadas);
+    - $X_{A3}$: Temperatura máxima (ºF);
+    - $X_{A4}$: Temperatura mínima (ºF).
+
+* Proporções de mobilidade gênica Pgi:
+    - $X_{G1}$: Para o tipo génetico de Pgi 0.40;
+    - $X_{G2}$: Para o tipo génetico de Pgi 0.60;
+    - $X_{G3}$: Para o tipo génetico de Pgi 1.00;
+    - $X_{G4}$: Para o tipo génetico de Pgi 1.16;
+    - $X_{G5}$: Para o tipo génetico de Pgi 1.30;
+
+Para as proporções de mobilidade gênica Pgi $\sum X_{Gi} =
+1$. Na \autoref{fig:splom-ecdf} são apresentados dois gráficos que
+descrevem o corportamente das variáveis ambientais e genéticas. No
+gráfico da esquerda as variáveis ambientais são dispostas em gráficos de
+dispersão aos pares. Observa-se que as colônias GH e GL são as que mais
+diferem das demais colônias, sendo essas colônias de alta altitude e
+baixas temperaturas. No gráfico a direita são apresentadas as proporções
+acumuladas das freqências gênicas registradas em cada colônia. Destes
+perfis gênicos as colônias que mais se destacam são a GH e LO, que
+acumulam uma proporção maior de mobilidade gênica nos primeiros tipos de
+Pgi (0.4, 0.6 e 1.0).
+
+```{r splom-ecdf, fig.height=5, fig.width=10, fig.cap="Gráfico de dispersão por pares entre as variáveis ambientais (esquerda). Proporções acumuladas de mobilidade gênica dos cinco diferentes tipos genéticos de Pgi."}
+
+##----------------------------------------------------------------------
+## Descriptive analysis
+da <- cbind(da, expand.grid(pch = c(8, 19),
+                            color = cols[1:8],
+                            stringsAsFactors = FALSE))
+pspace <- list(layout.heights = list(top.padding = 10))
+
+## For ambiental variables
+codvarsa <- parse(text = paste0("X[A", 1:length(ambvars), "]"))
+xy1 <- splom(~da[, ambvars],
+             groups = col,
+             data = da,
+             varnames = codvarsa,
+             xlab = "",
+             par.settings = list(
+                 layout.heights = list(top.padding = 10)
+             ),
+             pscales = lapply(da[, ambvars], function(x) {
+                 list(limits = extendrange(x, f = 0.2))
+             }),
+             diag.panel = function(x, ...){
+                 yrng <- current.panel.limits()$ylim
+                 d <- density(x, na.rm = TRUE)
+                 d$y <- with(d, yrng[1] + 0.9 * diff(yrng) * y / max(y))
+                 panel.polygon(
+                     x = c(d$x, rev(d$x)),
+                     y = c(d$y, rep(min(d$y), length(d$y))),
+                     col = "gray80", border = "white")
+                 diag.panel.splom(x, ...)
+             },
+             panel = function(x, y, groups, ...) {
+                 panel.grid()
+                 print(data.frame(x, groups, da$color))
+                 panel.points(x, y,
+                              col = da$color,
+                              pch = da$pch,
+                              cex = 1.1, alpha = 0.8)
+                 ## panel.text(x, y - 0.1, groups,
+                 ##            cex = 0.6, col = "gray50")
+             })
+
+## For genetics variables (note they are percentage)
+aux <- cbind(da[, c("col", "pch", "color")],
+             as.data.frame(t(apply(da[, genvars], 1, cumsum))))
+
+da_long <- melt(aux, id.vars = c("col", "pch", "color"))
+codvarsg <- parse(text = paste0("X[G", 1:length(genvars), "]"))
+
+xy2 <- xyplot(value ~ variable,
+              groups = col,
+              data = da_long,
+              type = c("g", "l", "p"),
+              xlab = "",
+              ylab = "Proporções acumuladas de Pgi",
+              scales = list(x = list(labels = codvarsg)),
+              par.settings = list(
+                 layout.heights = list(top.padding = 9)
+             ),
+              panel = function(x, y, groups, ...) {
+                  panel.xyplot(x, y, groups, ...,
+                               col = da$color, pch = da$pch)
+              })
+
+## Legend for graphics
+key <- list(
+    space = "top",
+    column = 4,
+    points = list(
+        pch = da$pch,
+        fill = "white",
+        col = da$color),
+    lines = list(col = da$color),
+    text = list(as.character(da$col), cex = 0.8)
+)
+
+print(xy1, split = c(1, 1, 2, 1), more = TRUE)
+print(xy2, split = c(2, 1, 2, 1), more = FALSE)
+draw.key(key = key, draw = TRUE,
+         vp = grid::viewport(
+             x = grid::unit(0.55, "npc"),
+             y = grid::unit(0.92, "npc")))
+
+```
+
+O interesse nesse estudo é avaliar o relacionamento das variáveis
+ambientais e genéticas. Para tal trabalhar-se-á com as matrizes de
+distâncias para os dois conjuntos de variáveis. Para as variáveis
+ambientais as distâncias serão calculadas conforme
+\autoref{eqn:euclidean-dist}. Já para as variáveis genéticas, que tem a
+restrição de soma 1, será utilizado a seguinte métrica de distância
+\begin{equation}
+    \label{eqn:proportion-dist}
+    d(i, j) = \frac{1}{2}\sum_{k=1}^{6}\left | p_{ki}-p_{kj} \right |
+\end{equation}
+
+```{r distaxg, fig.height=6, fig.width=12, fig.cap="Matrizes de distâncias considerando as variáveis ambientais (esquerda) e genéticas (direita)."}
+
+##----------------------------------------------------------------------
+## Calcule and visualize distances matrices
+
+ambD <- dist(da[, ambvars])
+genD <- pdist(da[, genvars])
+
+## Build data frame for use subscripts in lattice
+## daD <- rbind(
+##     cbind(melt(as.matrix(ambD)), vars = "Ambiental"),
+##     cbind(melt(as.matrix(genD)), vars = "Genética")
+## )
+xy1 <- levelplot(value ~ Var1 + Var2 | vars,
+          data = cbind(melt(as.matrix(ambD)),
+                       vars = "Ambiental"),
+          ## data = daD,
+          colorkey = FALSE,
+          xlab = "",
+          ylab = "",
+          scales = list(
+              at = 1:16, labels = da$col,
+              x= list(rot = 90)
+          ),
+          par.settings = list(
+              layout.widths = list(right.padding = -2)
+          ),
+          panel = function(x, y, z, ...) {
+                     ## print(as.list(...))
+                     panel.levelplot(x, y, z, ...)
+                     panel.text(x, y, round(z, 1), cex = 0.8)
+                 })
+
+xy2 <- levelplot(value ~ Var1 + Var2 | vars,
+          data = cbind(melt(as.matrix(genD)),
+                       vars = "Genética"),
+          ## data = daD,
+          colorkey = FALSE,
+          xlab = "",
+          ylab = "",
+          scales = list(
+              at = 1:16, labels = da$col,
+              x= list(rot = 90)
+          ),
+          par.settings = list(
+            layout.widths = list(left.padding = -2)
+          ),
+          panel = function(x, y, z, ...) {
+                     ## print(as.list(...))
+                     panel.levelplot(x, y, z, ...)
+                     panel.text(x, y, round(z, 1), cex = 0.8)
+                 })
+
+print(xy1, split = c(1, 1, 2, 1), more = TRUE)
+print(xy2, split = c(2, 1, 2, 1), more = FALSE)
+
+```
+
+As matrizes de distância entre as colônias considerando as variáveis
+ambientais e genéticas são exibidas na \autoref{fig:distaxg}. Note que,
+assim como já observado na \autoref{fig:splom-ecdf}, as colônias GH e GL
+obtiveram as maiores distâncias. Agora considerando a matriz de
+distâncias genéticas, temos as colônias LO e UO como as mais distantes.
+
+Em posse das matrizes de distâncias entre as colônias para o conjunto de
+variáveis ambientais e genéticas, procedeu-se com a realização do teste
+de aleatorização matricial de Mantel a fim de avaliar se há correlação
+positiva entre as distâncias ambientais e genéticas. O procedimento do
+teste é basicamente i) aleatorizar os valores das matrizes e ii)
+calcular o coeficiente de correlação entre as distâncias
+aleatorizadas. Os passos i) e ii) são repetidos $N$ vezes para se obter
+uma dsitribuição empírica das correlações sob a hipótese de correlação
+nula e por fim a correlação calculada com base nas distâncias originais
+é confrontada com essa distribuição.
+
+```{r}
+
+##----------------------------------------------------------------------
+## Mantel test for correlation between ambiental and genetics distances
+N <- 1000
+out <- mantelTest(ambD, genD, nperm = N, graph = FALSE)
+
+est <- round(out$correlation, 3)
+pval <- round(out$p.value, 4)
+dest <- round(out$nullcor, 3)
+q95 <- round(quantile(dest, 0.95), 4)
+
+```
+
+A correlação entre as matrizes de distâncias ambientais e genéticas foi
+de `r est`. Foram realizadas 1000 permutações das matrizes e calculadas
+as correlações, cujo o qualtil de 95\% foi de `r q95`. Como $`r est` >
+`r q95`$ há fortes evidências de que as distâncias ambientais
+estejam positivamente correlacionadas com as distâncias genéticas.
+
+Conforme análises apresentadas anteriormente mostra-se que há correlação
+positiva à 5\% entre as variáveis ambientais e genéticas. Porém nessa
+análsie foi negligenciada a posição espacial de cada colônia. Essa
+informação pode estar associada aos resultados obtidos, uma vez que as
+variáveis genéticas podem ser hereditárias e o processo migratório das
+borboletas pode ter ocorrido entre colônias.
+
+\pagebreak
+
+# Análise de Componentes Principais
+
+```{r}
+
+##======================================================================
+## Exercise chapter 6
+##======================================================================
+
+##----------------------------------------------------------------------
+## Load and organize data
+## help(ManlyTb6.6, h = "html")
+da <- data.frame(scale(ManlyTb6.6))
+
+##----------------------------------------------------------------------
+## Compute principal components
+out <- prcomp(da)
+stddev <- out$sdev
+loading <- out$rotation
+scores <- out$x
+propvar <- stddev^2 / sum(stddev^2)
+pacum <- cumsum(propvar)
+corr <- t(loading) * stddev
+
+```
+
+Esse exercício faz referência as técnicas apresentadas no capítulo 6 do
+livro-texto. Os dados descrito no exercício é referente a um estudo
+sobre taças de cerâmica escavadas de lugares pré-históricos na
+Tailândia. Foram `r ncol(da)` medidas feitas em cada taça. Ao todo foram
+mensuradas as medidas em `r nrow(da)` taças. A natureza das medidas pode
+ser vista em @Manly2008[pág.102, Figura 6.3].
+
+O objetivo nesse estudo é caracterizar as taças identificando grupos
+com características similares e identificar, se houverem, taças
+incomuns. O método apresentado nesse capítulo para atingir os objetivos
+do estudo é via análise de componentes principais.
+
+A construção dos componentes principais foi realizada via matriz de
+correlação para que a amplitude de variação das variação não influencie
+fortemente na análise. Os resultados da análise são apresentados na
+\autoref{fig:biplot}.
+
+O primeiro gráfico, superior à esquerda, da \autoref{fig:biplot} auxilia
+a escolha que quantas componentes serão necessárias para explicar os
+dados. Note que com duas componentes já explica-se `r round(pacum[2],
+2)*100`\% da variância dos dados, o que já é bastante
+satisfatório. Outro critério usualmente adotado é escolher tantas
+componentes quanto fores os autovalores maiores que 1, nesse caso esse
+critério também leva a escolha de apenas duas componentes (autovalores
+`r round(stddev[1:2]^2, 3)`).
+
+```{r biplot, fig.height=5, fig.width=10, fig.cap="Proporção acumulada da variância por cada componente com apresentação dos autovalores (superior à esquerda). Matriz de carregamentos, auto vetores, associados as 2 primeiras componentes (inferior à esquerda). Biplot (à direita), dispersão dos escores calculados com base nas 2 primeiras componentes e correlação das variáveis originais com as componentes."}
+
+##----------------------------------------------------------------------
+## Visualize analysis
+varsname <- parse(text = paste("X[", seq(propvar), "]"))
+
+## Alternative scree-plot (shows cumulative proportion of variance
+## explained)
+
+lambdas <- parse(text = paste0("lambda[", 1:6, "]~(",
+                               round(stddev^2, 2), ")"))
+xy1 <- xyplot(pacum ~ seq(propvar),
+              pch = 19, type = c("l", "p"),
+              xlab = "",
+              ylab = "% variância explicada",
+              xlim = c(0.5, 7),
+              ylim = c(0.67, 1.03),
+              scales = list(
+                  x = list(at = seq(propvar),
+                           labels = paste0("PC", seq(propvar)))
+              ),
+              panel = function(x, y, ...) {
+                  panel.abline(h = seq(.7, 1, by = .05),
+                               col = "lightgray", lty = 2)
+                  panel.xyplot(x, y, ...)
+                  panel.text(x + 0.45, y - 0.015, lambdas,
+                             cex = 0.8)
+              })
+
+## Loadings of principal components
+xy2 <- levelplot(loading[, 1:2],
+                 xlab = "",
+                 ylab = "",
+                 scales = list(x = list(labels = varsname)),
+                 aspect = "fill",
+                 colorkey = FALSE,
+                 ## colorkey = list(space = "bottom"),
+                 at = seq(-1, 1, length.out = 20),
+                 col.regions = colorRampPalette(
+                     c(cols[3], "gray90", cols[2]))(100),
+                 panel = function(x, y, z, ...) {
+                     panel.levelplot(x, y, z, ...)
+                     panel.text(x, y, round(z, 3), cex = 0.8)
+                 })
+
+##-------------------------------------------
+## Biplot
+limits <- c(-1, 1) * max(abs(scores[, 1:2])) * 1.1
+xy3 <- xyplot(PC2 ~ PC1, data = as.data.frame(scores),
+              scales = list(alternating = 1),
+              xlab = "PC1",
+              ylab = "PC2",
+              xlim = limits,
+              ylim = limits,
+              par.settings = list(
+                  layout.heights = list(top.padding = 4.5),
+                  layout.widths = list(right.padding = 6.4)
+              ),
+              xscale.components = function(...) {
+                  ans <- xscale.components.default(...)
+                  ans$top <- ans$bottom
+                  ans$top$ticks$tck <- 0
+                  ans$bottom$ticks$tck <- 1
+                  ans
+              },
+              yscale.components = function(...) {
+                  ans <- yscale.components.default(...)
+                  ans$right <- ans$left
+                  ans$right$ticks$tck <- 0
+                  ans$left$ticks$tck <- 1
+                  ans
+              },
+              panel = function(x, y, ...) {
+                  panel.abline(h = 0, v = 0, lty = 2,
+                               col = "gray50")
+                  panel.xyplot(x, y, alpha = 0.8,
+                               pch = 19, cex = 1.1,
+                               col = "gray50", ...)
+                  panel.text(x + 0.1, y - 0.1, cex = 0.8,
+                             rownames(da), ...)
+              })
+xy4 <- xyplot(-1:1 ~ -1:1,
+              scales = list(
+                  alternating = 2,
+                  col = cols[2]
+              ),
+              xlab = "",
+              ylab = "",
+              xlab.top = list("Correlações com PC1", col = cols[2]),
+              ylab.right = list("Correlações com PC2", col = cols[2]),
+              par.settings = list(
+                  layout.heights = list(bottom.padding = 4.5),
+                  layout.widths = list(left.padding = 5.2)
+              ),
+              xscale.components = function(...) {
+                  ans <- xscale.components.default(...)
+                  ans$top <- ans$bottom
+                  ans$top$ticks$tck <- 1
+                  ans$bottom$ticks$tck <- 0
+                  ans
+              },
+              yscale.components = function(...) {
+                  ans <- yscale.components.default(...)
+                  ans$right <- ans$left
+                  ans$right$ticks$tck <- 1
+                  ans$left$ticks$tck <- 0
+                  ans
+              },
+              panel = function(x) {
+                  panel.arrows(
+                      x0 = 0, y0 = 0, col = cols[2],
+                      x1 = corr[1, ], y1 = corr[2, ],
+                      length = 0.1, angle = 20)
+                  panel.text(x = corr[1, ] + 0.03,
+                             y = corr[2, ] - 0.03,
+                             varsname, col = cols[2])
+              })
+
+
+## Organize display
+print(xy1, position = c(0.0, 0.4, 0.5, 1.0), more = TRUE)
+print(xy2, position = c(0.0, 0.0, 0.5, 0.5), more = TRUE)
+print(xy3, position = c(0.48, 0.0, 1.0, 1.0), more = TRUE)
+print(xy4, position = c(0.48, 0.0, 1.0, 1.0), more = FALSE)
+
+```
+
+# Análise de Fatores
+
+Although we can see that this is an easy dataset to work with, it allow
+us to clearly see that the versicolor specie is well separated from the
+virginica one in the upper panel while there is still some overlap
+between them in the lower panel. This kind of difference is to be
+expected since PCA tries to retain most of the variability in the data
+while LDA tries to retain most of the between-class variance in the
+data. Note also that in this example the first LD explains more than
+{99\%} of the between-group variance in the data while the first PC
+explains {73\%} of the total variability in the data.
+
+# Análise de Função Discriminante
+
+Although we can see that this is an easy dataset to work with, it allow
+us to clearly see that the versicolor specie is well separated from the
+virginica one in the upper panel while there is still some overlap
+between them in the lower panel. This kind of difference is to be
+expected since PCA tries to retain most of the variability in the data
+while LDA tries to retain most of the between-class variance in the
+data. Note also that in this example the first LD explains more than
+{99\%} of the between-group variance in the data while the first PC
+explains {73\%} of the total variability in the data.
+
+# Análise de Agrupamentos
+
+Although we can see that this is an easy dataset to work with, it allow
+us to clearly see that the versicolor specie is well separated from the
+virginica one in the upper panel while there is still some overlap
+between them in the lower panel. This kind of difference is to be
+expected since PCA tries to retain most of the variability in the data
+while LDA tries to retain most of the between-class variance in the
+data. Note also that in this example the first LD explains more than
+{99\%} of the between-group variance in the data while the first PC
+explains {73\%} of the total variability in the data.
+
+# Análise de Correlação Canônica
+
+Although we can see that this is an easy dataset to work with, it allow
+us to clearly see that the versicolor specie is well separated from the
+virginica one in the upper panel while there is still some overlap
+between them in the lower panel. This kind of difference is to be
+expected since PCA tries to retain most of the variability in the data
+while LDA tries to retain most of the between-class variance in the
+data. Note also that in this example the first LD explains more than
+{99\%} of the between-group variance in the data while the first PC
+explains {73\%} of the total variability in the data.
+
+# Escalonamento Multidimensional
+
+Although we can see that this is an easy dataset to work with, it allow
+us to clearly see that the versicolor specie is well separated from the
+virginica one in the upper panel while there is still some overlap
+between them in the lower panel. This kind of difference is to be
+expected since PCA tries to retain most of the variability in the data
+while LDA tries to retain most of the between-class variance in the
+data. Note also that in this example the first LD explains more than
+{99\%} of the between-group variance in the data while the first PC
+explains {73\%} of the total variability in the data.
+
+
+# Referências {-}
+
+\setlength\parindent{0pt}
+
+
+[carlos]: http://www.lce.esalq.usp.br/tadeu.html
