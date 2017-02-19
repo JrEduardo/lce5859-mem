@@ -1,0 +1,92 @@
+%-----------------------------------------------------------------------
+
+\documentclass[a4paper]{article}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+%-----------------------------------------------------------------------
+% Pacotes.
+
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{eulervm}
+\usepackage{palatino}
+\usepackage{inconsolata}
+\usepackage[hmargin={1.7cm, 1.7cm}, vmargin={1.7cm, 1.7cm}]{geometry}
+\usepackage{amsmath, amsfonts, mathrsfs, amssymb, amsthm}
+\usepackage{indentfirst, graphicx, calc, setspace, icomma}
+\usepackage[table, usenames, svgnames]{xcolor}
+\usepackage{float}
+\usepackage{multicol, multirow}
+\usepackage{enumerate}
+\usepackage{longtable,booktabs}
+
+%-----------------------------------------------------------------------
+% Links
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=Teal,
+  citecolor=Teal, urlcolor=Teal}
+
+%-----------------------------------------------------------------------
+% Tikz.
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usetikzlibrary{arrows, calc, matrix, positioning, trees,
+                decorations.pathmorphing, backgrounds, fit}
+
+%-----------------------------------------------------------------------
+% Definições.
+
+% Linhas horizontais.
+\newcommand{\HRule}{\noindent\rule{\linewidth}{0.3mm}}
+
+% Lista centralizada.
+\newenvironment{clist}{
+  \begin{center}\begin{inparaenum}[a)]}{
+    \end{inparaenum}\end{center}}
+
+%-----------------------------------------------------------------------
+
+\begin{document}
+
+\def\cabecalho{
+  \thispagestyle{empty}
+  \HRule\\[-0.1cm]
+
+  \noindent
+  \begin{minipage}[c]{0.75\textwidth}
+    \baselineskip 12pt
+    $if(institute)$$institute$\\ $endif$
+    $if(chair)$$chair$\\ $endif$
+    $if(academic)$$academic$$if(email)$ ($email$)$endif$\\ $endif$
+    $if(date)$$date$$endif$\\
+  \end{minipage}
+  \hfill
+  \begin{minipage}[c]{0.25\textwidth}
+    $if(logo)$
+    \begin{flushright}
+      \vspace*{-0.35cm}
+      \includegraphics[height=2cm]{$logo$}
+    \end{flushright}
+    $endif$
+  \end{minipage}\\[-0.1cm]
+  \HRule \hspace{0.5cm}
+  \begin{center}
+    $if(title)$\huge \bfseries $title$$endif$\\[0.5cm]
+  \end{center}
+}
+
+\cabecalho{}
+
+$body$
+
+$for(include-after)$
+  $include-after$
+$endfor$
+
+\end{document}
+\endinput
