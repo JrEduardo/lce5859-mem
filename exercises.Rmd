@@ -418,9 +418,10 @@ variáveis é realizada abaixo:
 * Proporções de mobilidade gênica Pgi:
     - $X_{G1}$: Para o tipo génetico de Pgi 0.40;
     - $X_{G2}$: Para o tipo génetico de Pgi 0.60;
-    - $X_{G3}$: Para o tipo génetico de Pgi 1.00;
-    - $X_{G4}$: Para o tipo génetico de Pgi 1.16;
-    - $X_{G5}$: Para o tipo génetico de Pgi 1.30;
+    - $X_{G3}$: Para o tipo génetico de Pgi 0.80;
+    - $X_{G4}$: Para o tipo génetico de Pgi 1.00;
+    - $X_{G5}$: Para o tipo génetico de Pgi 1.16;
+    - $X_{G6}$: Para o tipo génetico de Pgi 1.30;
 
 Para as proporções de mobilidade gênica Pgi $\sum X_{Gi} =
 1$. Na \autoref{fig:splom-ecdf} são apresentados dois gráficos que
@@ -812,6 +813,39 @@ print(xy3, position = c(0.48, 0.0, 1.0, 1.0), more = TRUE)
 print(xy4, position = c(0.48, 0.0, 1.0, 1.0), more = FALSE)
 
 ```
+
+Já no segundo gráfico, inferior à esquerda da \autoref{fig:biplot},
+têm-se os coeficientes da combinação linear das variáveis originais que
+compõem as primeira e segunda componentes. Note que a primeira
+componente é basicamente a soma de todas as variáveis originais, a
+partir da definição das variáveis em @Manly2008[pág.102, Figura 6.3],
+pode-se interpretar essa variável como o _tamanho_ da taça, uma vez que
+valores altos definem uma taça grande e baixo uma taça menor. Para a
+segunda componente temos basicamente um contraste de $X_1 + X_5$ contra
+$X_3 + X_6$. $X_1$ e $X_5$ são medidas horizontais que definem a largura
+da taça, enquanto que $X_3$ e $X_6$ são medidas verticais que definem
+altura. Assim essa componente pode ser interpretada como _forma_, onde
+taças mais "gordinhas" recebem valores altos e as mais "magrinhas"
+valores baixos.
+
+A última visualização apresentada na \autoref{fig:biplot} é o gráfico
+_biplot_ [@Holland2008]. Nesse gráfico os escores de cada taça,
+calculados a partir das componentes principais, são apresentados em um
+gráfico de dispersão conjuntamente com a correlações entre as
+componentes e as variáveis orginais, que são representadas pelos vetores
+com valores em um eixo adicional. Observe que as taças 23, 24 e 22 se
+destacam pelos valores baixos na primeira componente, isso as
+caracteriza como taças baixas e com relação a segunda componente têm-se
+um valor mediano para as três, ou seja, são taças pequenas e com formato
+mediano. De forma geral nota-se que os escores da primeira componente
+são bem mais variáveis que o da segunda, isso mostra que o tamanho das
+taças é mais variado do que a forma. Para as correlações entre as
+variáveis originais têm-se a mesma interpretação realizada a partir da
+matriz de carregamentos. Valores altos da primeira componente estão
+relacionados a valores altos de $X_1$, $X_2$, $X_3$, $X_4$, $X_5$ e
+$X_6$ (correlações `r round(corr[1,], 2)`). A segunda componente
+apresenta correlação negativa com $X_2$, $X_3$, $X_4$ e $X_6$ e
+positivas com $X_1$ e $X_5$.
 
 # Análise de Fatores
 
