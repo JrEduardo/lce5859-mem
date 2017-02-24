@@ -73,6 +73,8 @@ cols <- trellis.par.get("superpose.line")$col
 
 ```
 
+\pagebreak
+
 # Testes de Significância com Dados Multivariados
 
 ```{r}
@@ -1493,17 +1495,136 @@ print(xtable(tabglm, caption = cap,
 
 ```
 
+\pagebreak
+
 # Análise de Agrupamentos
 
-Although we can see that this is an easy dataset to work with, it allow
-us to clearly see that the versicolor specie is well separated from the
-virginica one in the upper panel while there is still some overlap
-between them in the lower panel. This kind of difference is to be
-expected since PCA tries to retain most of the variability in the data
-while LDA tries to retain most of the between-class variance in the
-data. Note also that in this example the first LD explains more than
-{99\%} of the between-group variance in the data while the first PC
-explains {73\%} of the total variability in the data.
+```{r}
+
+##======================================================================
+## Exercise chapter 9
+##======================================================================
+
+##----------------------------------------------------------------------
+## Packages
+library(dendextend)
+library(magrittr)
+
+##----------------------------------------------------------------------
+## Load and organize data
+## help(ManlyTb9.7, h = "html")
+da <- ManlyTb9.7
+colnames(da)[-1] <- paste("Lote", 1:ncol(da[, -1]))
+da_long <- melt(da, id.vars = "esp")
+
+da_spec <- as.matrix(da[, -1])
+rownames(da_spec) <- da$esp
+da_lote <- t(as.matrix(da[, -1]))
+rownames(da_lote) <- colnames(da)[-1]
+
+```
+
+Essa seção refere-se ao capítulo 9 do livro-texto. O exercício propõe a
+realização de uma análise de agrupamentos. Os dados apresentados no
+exercício mostram as quantidades das 25 espécies de plantas mais
+abundantes em 17 lotes de um prado de pastagem em uma reserva natural na
+Suécia. Ao todo são $25\times 17$ observações, ou seja, uma quantidade
+mensurada para cada combinação de espécie e lote.
+
+Um descrição dos dados é apresentada na \autoref{fig:boxplot9} onde
+box-plots das medidas de abundância são construídos para cada espécie (à
+esquerda) e para cada lote (à direita). Note que em geral as
+distribuições das medidas são bastante assimétricas à direita, com
+muitos valores baixos e poucos altos, as exceções ficam por conta das
+espécies _Anemone nemorosa_, _Rumex acetosa_ e _Veronica Chamaedrys_ e
+do _Lote 6_ que apresentam distribuições mais simétricas.
+
+```{r boxplot9, fig.height=4.5, fig.width=11, fig.cap="Box-plots das medidas de abundância para as 25 espécies (esquerda) e para os 17 lotes (direita)."}
+
+##----------------------------------------------------------------------
+## Descriptive analysis
+xy1 <- bwplot(value ~ esp, data = da_long,
+              horizontal = FALSE,
+              scales = list(x = list(rot = 45, cex = 0.8)),
+              ylab = "",
+              axis = axis.grid)
+xy2 <- bwplot(value ~ variable, data = da_long,
+              horizontal = FALSE,
+              scales = list(x = list(rot = 45, cex = 0.8)),
+              ylab = "",
+              axis = axis.grid)
+
+print(xy1, position = c(0.02, 0.0, 0.58, 1.0), more = TRUE)
+print(xy2, position = c(0.55, 0.0, 1.0, 1.0), more = FALSE)
+
+```
+
+A análise de agrupamento desses dados será realizada sob duas
+perspectivas. Na primeira agruparemos as espécies, avaliando as
+similaridades das medidas de abundâncias dsitribuídas nos 17 diferentes
+lotes. Sob a segunda perspectiva serão agrupados os lotes, a fim de
+identificar grupos de lotes que tem abundância de espécies similares.
+
+Nessa análise realizou-se um agrupamento hierárquico pelo método de
+_Ward_ [@Murtagh2014] a partir das distâncias euclidianas entre os
+vetores $\underline{x}_i$ ($i=1,2,\ldots,25$ vetores de tamanho 17 para
+o agrupamento de espécies e $i=1,2,\ldots,17$ vetores de tamanho 25 para
+o agrupamento de lotes).
+
+```{r dendro, fig.height=4, fig.width=10, fig.cap="Dendrograma obtidos da análise de agrupamento hierárquico pelo método de Ward. Agrupamento de espécies (esquerda) e de lotes (direita)."}
+
+##----------------------------------------------------------------------
+## Clustering analysis
+
+##-------------------------------------------
+## By Species
+
+## Grouping 10% most common words
+k_spec <- 3 ## Decisão não automatizada, para agrupamento herárquico
+
+mdist_spec <- dist(scale(da_spec))
+agrup_spec <- hclust(mdist_spec, method = "ward.D")
+
+## Build and show the dendogram
+## par(mfrow = c(1, 2))
+layout(matrix(c(1, 2), ncol = 2), widths = c(0.6, 0.4))
+par(mar = c(8, 3, 1, 1) + 0.1)
+dendr_spec <- as.dendrogram(agrup_spec)
+dendr_spec %>%
+    set("labels_cex", 0.9) %>%
+    color_branches(k = k_spec) %>%
+    plot(horiz = FALSE)
+rect.dendrogram(dendr_spec, k = k_spec, horiz = FALSE,
+                lty = 2, border = "gray30")
+
+##-------------------------------------------
+## By Lotes
+
+## Grouping 10% most common words
+k_lote = 2 ## Decisão não automatizada, para agrupamento herárquico
+
+mdist_lote <- dist(scale(da_lote))
+agrup_lote <- hclust(mdist_lote, method = "ward.D")
+
+## Build and show the dendogram
+par(mar = c(8, 1, 1, 1) + 0.1)
+dendr_lote <- as.dendrogram(agrup_lote)
+dendr_lote %>%
+    set("labels_cex", 0.9) %>%
+    color_branches(k = k_lote) %>%
+    plot(horiz = FALSE)
+rect.dendrogram(dendr_lote, k = k_lote, horiz = FALSE,
+                lty = 2, border = "gray30")
+
+```
+
+Na \autoref{fig:dendro} são apresentados os resultados da análise de
+agrupamentos para as espécies (à direita) e para os lotes (à
+esquerda). Sem um apelo aplicado, neste trabalho optou-se pela adoção de
+um algoritmo altomático para a definição do número de grupos. A
+definição do número de grupos deu-se pelos grupos formados na maior
+distância de ligação. Para espécies foram tomados três grupos e para os
+lotes dois.
 
 \pagebreak
 
@@ -1733,6 +1854,9 @@ xys <-
 gridExtra::marrangeGrob(xys, ncol = 3, nrow = 1, top = "")
 
 ```
+
+
+\pagebreak
 
 # Escalonamento Multidimensional
 
