@@ -1855,21 +1855,199 @@ gridExtra::marrangeGrob(xys, ncol = 3, nrow = 1, top = "")
 
 ```
 
-
 \pagebreak
 
 # Escalonamento Multidimensional
 
-Although we can see that this is an easy dataset to work with, it allow
-us to clearly see that the versicolor specie is well separated from the
-virginica one in the upper panel while there is still some overlap
-between them in the lower panel. This kind of difference is to be
-expected since PCA tries to retain most of the variability in the data
-while LDA tries to retain most of the between-class variance in the
-data. Note also that in this example the first LD explains more than
-{99\%} of the between-group variance in the data while the first PC
-explains {73\%} of the total variability in the data.
+```{r}
 
+##======================================================================
+## Exercise Chaper 11
+##======================================================================
+
+##----------------------------------------------------------------------
+## Packages
+library(MASS)
+
+##----------------------------------------------------------------------
+## Functions
+outlierid <- function(dados, centerfun = median, n = 5, ...) {
+    centro <- apply(dados, 2, centerfun, ...)
+    dists  <- apply(dados, 1, function(x) sqrt(sum((x - centro)^2)))
+    ident <- order(dists, decreasing = TRUE)[1:n]
+    attr(ident, "dist") <- dists[ident]
+    return(ident)
+}
+
+##----------------------------------------------------------------------
+## Load and organize data
+## help(ManlyTb1.5, h = "html")
+
+da <- ManlyTb1.5
+da$pais[21] <- "Rep. Tcheca"
+rownames(da) <- paste0(da$pais, " (", da$grup, ")")
+
+D <- dist(da[, -(1:2)])
+
+```
+
+Essa seção destina-se à aplicação da análise de escalonamento
+multidimensional, descrita no capítulo 11 do livro-texto. Essa abordagem
+é ideal para casos em que se mensura distâncias ou medidas de
+dissimilaridade entre objetos. O objetivo da análise multidimensional é
+reproduzir dimensões que reflitam a matriz de medidas de dissimilaridade
+obtida.
+
+A aplicação proposta nessa seção refere-se aos dados já apresentados
+anteriormente na \autoref{analise-de-correlacao-canonica}, onde foram
+apresentados os dados sobre empregos em países europeus. O estudo
+mensurou a porcentagem da força de trabalho de empregados em nove
+diferentes grupos de indústria (agricultura, floresta e pesca; mineração
+e exploração de pedreiras; fabricação; fornecimento de energia e água;
+construção; serviços; finanças; serviços sociais e pessoais; e
+transportes e comunicações). Como aqui só considera-se os dados sobre
+empregos, há dados sobre 30 países.
+
+Vale ressaltar que em análises não didátivas têm-se apenas essa matriz
+de dados observados, é incomum e não recomendável trabalhar somente com
+as distâncias quando se tem os dados originais.
+
+Na \autoref{fig:dist-mult} são apresentadas as distâncias calculadas
+entre cada par de países. As siglas ao lado do nome de cada país indicam
+o grupo político (UE, União Européia; AELC, área européia livre
+comércio, países do leste europeu e outros países). No gráfico é nítido
+a dissimilaridade da Albânia com relação a praticamente todos os países,
+razoavelmente similar somente com a Turquia. Outra característica
+marcante é a similaridade entre países de mesmo grupo político,
+sobretudo destaca-se as semelhanças entre países da União Européia (UE)
+e da área européia de livre comércio (AELC).
+
+```{r dist-mult, fig.height=9.5, fig.width=9.5, fig.cap="Matriz de distância entre os países europeus considerando as porcentagens de trabalho empregada em cada setor industrial."}
+
+##----------------------------------------------------------------------
+## Descriptive analysis
+levelplot(as.matrix(D),
+          xlab = "",
+          ylab = "",
+          scales = list(x = list(rot = 40)),
+          panel = function(x, y, z, ...) {
+              ## print(as.list(...))
+              panel.levelplot(x, y, z, ...)
+              ## panel.text(x, y, round(z, 2), )
+          })
+
+```
+
+A partir da matriz de distâncias procedeu-se com a análise de
+escalonamento multidimensional. Considerou-se apenas o escalonamento
+não-métrico de Kruskal. A definição do número de dimensões
+necessárias para que se reflita adequadamente a matriz de distâncias foi
+realizada por meio da avaliação do STRESS considerando diferentes
+dimensões.
+
+\begin{multicols}{2}
+
+```{r stress-plot, fig.height=4, fig.width=5, out.width="0.5\\textwidth", fig.cap = "Valor de STRESS para diferentes números de dimensões no escalonamento multidimensional não-métrico de Kruskal."}
+
+##----------------------------------------------------------------------
+## Choose number of dimensions
+
+kseq <- 1:10
+mds <- lapply(kseq, function(k) {
+    isoMDS(D, k = k, trace = FALSE)
+})
+meds <- sapply(mds, function(x) x$stress)
+
+xyplot(meds ~ kseq,
+       xlab = "Número de dimensões",
+       ylab = "STRESS",
+       type = c("g", "o"),
+       pch = 19,
+       scales = list(x = list(at = kseq)))
+
+kchoose <- 4
+
+```
+
+\columnbreak
+
+Na \autoref{fig:stress-plot} são exibidos os valores de STRESS
+calculados para dimensões de 1 a 10. Note que claramente uma ou duas
+dimensões são insatisfatórias, pois os valores de STRESS são superiores
+a 5 e o decréscimo quando consideradas mais dimensões é expressivo. O
+valor de STRESS para 3 dimensões foi de `r meds[3]` e para 4 dimensões
+resultou em `r meds[4]` um decréscimo de `r -diff(meds[3:4])`. Para 5
+dimensões o houve uma diminuição de apenas `r -diff(meds[4:5])`.
+Portanto foram escolhidas 4 dimensões para representar a matriz de
+distâncias apresentada na \autoref{fig:dist-mult}.
+
+A representação das observações nas dimensões obtidas é apresenta na
+\autoref{fig:dimen-plot} (à esquerda). Esse gráfica apresenta as
+observações nas coordenadas de cada dimensões. Nota-se que algumas
+dimensões podem ser intepretadas, por exemplo a dimensão 1 $D_1$, separa
+bem os países do Leste europeu dos demais. Ao invertigar a tabela de
+dados observa-se que países do leste investem mais força de trabalho em
+agricultura, florestal e pesca e em mineração e exploração de pedreira e
+tem porcentagens baixas para serviços.
+
+\end{multicols}
+
+\noindent O maior valor obtido nessa dimensão ocorreu para Albânia com
+59.7 $u.m$.. A segunda dimensão tem dois países destacados na
+extremidade inferior, esses são Hungria e Rep. Tcheca e da mesma forma
+poderíamos elencar suas características para buscar interpretação dessa
+dimensão.
+
+```{r dimen-plot, fig.height=6, fig.width=11, fig.cap="Representação dos países europeus nas 4 dimensões obtidas pela análise multidimensional não métrica de Krukal (esquerda) e distâncias observadas e distâncias obtidas das dimensões conforme configuração da análise."}
+
+##----------------------------------------------------------------------
+## Visualize dimensions
+dimen <- mds[[kchoose]]$points
+dnames <- parse(text = paste("D[", 1:ncol(dimen), "]"))
+xy1 <- splom(~dimen,
+             varnames = dnames,
+             xlab = "",
+             groups = rownames(da),
+             diag.panel = function(x, ...){
+                 yrng <- current.panel.limits()$ylim
+                 d <- density(x, na.rm = TRUE)
+                 d$y <- with(d, yrng[1] + 0.9 * diff(yrng) * y / max(y))
+                 panel.polygon(
+                     x = c(d$x, rev(d$x)),
+                     y = c(d$y, rep(min(d$y), length(d$y))),
+                     col = "gray70", alpha = 0.4, border = "white")
+                 diag.panel.splom(x, ...)
+             },
+             panel = function(x, y, groups, ...) {
+                 panel.grid()
+                 panel.abline(h = 0, v = 0, lty = 2, lwd = 0.8)
+                 panel.points(x, y, col = "gray50", pch = 19,
+                              cex = 1, alpha = 0.8)
+                 ## labs <- rep("", length(x))
+                 ## ind <- outlierid(cbind(x, y), n = 3)
+                 ## labs[ind] <- groups[ind]
+                 panel.text(x, y - 0.1, da$grup, cex = 0.65)
+             })
+
+## Recover the distances
+aux <- data.frame("dreal" = c(D), "dconf" = c(dist(dimen)))
+xy2 <- xyplot(dreal ~ dconf,
+              xlab = "Distância de configuração",
+              ylab = "Distância observada",
+              type = c("g", "p", "r"),
+              data = aux)
+
+print(xy1, position = c(0, 0, 0.5, 1), more = TRUE)
+print(xy2, position = c(0.5, 0, 1, 1), more = FALSE)
+
+```
+
+A direita da \autoref{fig:dimen-plot} têm-se uma avaliação da qualidade
+do modelo 4-dimensional não-métrico. São apresentadas as distâncias
+originais e as distâncias calculadas das quatro dimensões obtidas. O
+esperado é que as dimensões recuperem as distâncias que foram utilizadas
+na sua definição e como pode ser observado essa representação das
+distâncias pelas 4 dimensões se mostra bastante satisfatória.
 
 # Referências {-}
 
