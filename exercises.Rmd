@@ -227,11 +227,70 @@ legend("top", codvars, fill = cols,
 
 O método para comparação entre vetores médios quando se tem mais de duas
 amostras é denominado MANOVA (_Multivariate Analysis of Variance_) e o
-teste de significância para $H_0$: $\underline{\mu_i} = \underline{\mu_j}$
-$\forall\, i \neq j$ pode ser realizado via diferentes estatísticas . Nesse
-trabalho consideramos as estatísticas Traço de Pillai-Bartlett, Traço de
-Hotelling-Lawley, Lambda de Wilks e Raiz máxima de Roy conforme descrito
-em @Fox2011.
+teste de significância para $H_0$: $\underline{\mu_i} =
+\underline{\mu_j}$ $\forall\, i \neq j$ pode ser realizado via
+diferentes estatísticas . Nesse trabalho consideramos as estatísticas
+Traço de Pillai-Bartlett, Traço de Hotelling-Lawley, Lambda de Wilks e
+Raiz máxima de Roy tanto para MANOVA como para contrastes multivariados,
+conforme descrito em @Fox2011.
+
+Na análise de variância multivariada para comparação de médias para
+várias amostas, o teste pressupõe a normalidade multivariada dentro dos
+grupos e homogeneidade nas matrizes de variâncias e covariâncias. Para
+verificar a normalidade multivariada procedeu-se com o teste de Mardia
+com correção para pequenas amostras [@Korkmaz]. Os resultados são
+apresentados na \autoref{tab:assumptions}. Note que não há sérias
+evidências de assimétria para todos os grupos, pois a hipótese testade é
+a de não assimétria da distribuição, assim para todos os grupos
+obteve-se níveis descritivos superiores a 0.20. Quando consideramos a
+curtose da distribuição, os dados para os grupos _Pré-históricos_ e
+_Indianos_ apresentaram níveis descritivos do teste que sustentam a
+rejeição da hipótese nula, que neste caso é de que a curtose da
+distribuição é coerente com a distribuição Normal multivariada.
+
+```{r, results="asis"}
+
+cap <- paste("Teste de Mardia para normalidade mutivariada.",
+             "Estatísticas de teste e respecitvos níveis",
+             "descritivos entre parênteses.")
+
+## Mutivariate normality by group
+ass1 <- do.call(
+    rbind, lapply(
+               split(da[, -c(1, 11)], da$grup),
+               function(x) {
+                   res <- MVN::mardiaTest(x)
+                   s1 <- formatC(res@chi.small.skew, 3, format = "f")
+                   s2 <- formatC(res@p.value.small, 4, format = "f")
+                   k1 <- formatC(res@z.kurtosis, 3, format = "f")
+                   k2 <- formatC(res@p.value.kurt, 4, format = "f")
+                   cbind("Assimétria" = paste(s1, "(", s2, ")"),
+                         "Curtose" = paste(k1, "(", k2, ")"))
+               }))
+rownames(ass1) <- levels(da$grup)
+
+## Equals variances and covariances matrices
+ass2 <- biotools::boxM(da[, -c(1, 11)], da$grup)
+
+## Latex table
+print(xtable(ass1,
+             caption = cap,
+             label = "tab:assumptions"))
+
+```
+
+A segunda suposição, de matrizes de variâncias e covariâncias
+iguais para todos os grupos, foi avaliada pelo teste de M de Box
+[@Manly2008] que resultou na estatística `r ass2$stat` com um _p-valor_
+de $`r ass2$p.value`$ o que evidência a rejeição da hipótese nula de
+matrizes de variâncias e covariâncias homôgeneas.
+
+Claramente nota-se que algumas suposições não foram atendidas. Aqui
+dar-se-á continuidade ao estudo deixando de lado as suposições. Algumas
+estatísticas são mais robustas a falta de normalidade e a
+heterogeneidade das matrizes de variâncias e covariâncias, como o traço
+de Pillai e portanto devem ser preferíveis, porém todos serão
+prejudicadas.
 
 ```{r, results="asis"}
 
@@ -259,6 +318,14 @@ print(xtable(tab_global, digits = c(0, 0, 4, 4, 0, 2, -3),
 
 ```
 
+
+Na \autoref{tab:contrasts} são apresentados os resultados da análise de
+variância multivariada (MANOVA) com as diferentes estatísticas citadas
+anteriormente. Note que todas as estatísticas indicam que há um pelo
+menos um par de vetores de médias diferentes dentro os 10 pares
+possíveis (5 grupos). Esse resultado já era esperado, pois como
+apresentado naas análises descritivas, há grupos bastante distintos.
+
 ```{r}
 
 ## Linear Hypothesis Tests (contrasts)
@@ -277,6 +344,15 @@ tab_contr$Contrast <- do.call(
 
 ```
 
+Na \autoref{tab:contrasts} são apresentados os resultados dos testes
+para contrastes multivariados de médias do grupo _Pré-histórico_ contra
+os demais dois a dois. Note que os testes acusaram diferenças em todos
+os contrastes, indicando que o vetor das médias das medidas para os cães
+_Pré-históricos_ é diferente de todos os demais, porém com um nível
+descritivo demasiadamente menor quando contrastado com as médias
+calculadas para os cães modernos. Todavia vale ressaltar que esses
+resultados foram influenciados pela não verificação dos pressupostos.
+
 ```{r, results="asis"}
 
 cap <- c("Tabela de contrastes multivariados")
@@ -289,7 +365,22 @@ print(xtable(tab_contr[c(8, 7, 1:6)],
 
 ```
 
-```{r, fig.height=5, fig.width=10}
+A fim de avaliar o quão próximos foram os dados mensurados para os cães
+_Pré-histórios_ e _Modernos_ a \autoref{fig:perfis2} é
+apresentada. Nessa figura a distribuição de densidade empírica das nova
+variáveis para os dois grupos é exibida à esquerda. Note que há grande
+similaridade das distribuições, com algumas exceções como para $X_1$
+(comprimento da mandíbula) que tem variabilidade maior para os
+_Pré-históricos_. O mesmo ocorre para $X_4$, $X_6$ e $X_7$. À direita da
+figura têm-se um gráfico de perfil, onde boxplots das nove medidas são
+apresentados para cada grupo, unindo as médias por linhas. Analogamente
+ao gráfico anterior nota-se para $X_6$ (largura do primeiro molar) a
+maior diferença entre as medidas. Nesse gráfico é nítido que as médidas
+calculadas nos dois grupos são bastante pŕoximas o que evidência que os
+resultados apontados pelos testes de contrastes não é confiável devido a
+não verificação dos pressupostos.
+
+```{r perfis2, fig.height=5, fig.width=10}
 
 ##----------------------------------------------------------------------
 ## Comparação das distribuições das 9 variáveis entre os caes
@@ -357,7 +448,6 @@ print(xy1, split = c(1, 1, 2, 1), more = TRUE)
 print(xy2, split = c(2, 1, 2, 1), more = FALSE)
 
 ```
-
 
 \pagebreak
 
