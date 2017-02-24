@@ -119,7 +119,7 @@ cuons e lobos indianos) em termos de nove medidas de mandíbula:
 
  * $X_1$ Comprimento da mandíbula (mm).
  * $X_2$ Largura da mandíbula, abaixo do primeiro molar (mm).
- * $X_3$ Largura do côndilo aricular (mm).
+ * $X_3$ Largura do côndilo auricular (mm).
  * $X_4$ Altura da mandíbula, abaixo do primeiro molar (mm).
  * $X_5$ Comprimento do primeiro molar (mm).
  * $X_6$ Largura do primeiro molar (mm).
@@ -196,7 +196,7 @@ print(xy2, split = c(2, 1, 2, 1), more = FALSE)
 
 Um dos interesses levantados sobre esse estudo é em testar as diferenças
 entre os vetores médios dos grupos caninos a fim de identificar,
-principalmente se há diferenças entre os cães Pré-histórios e os
+principalmente se há diferenças entre os cães Pré-históricos e os
 demais. Uma representação do perfil médio de cada grupo canino é
 apresentada na \autoref{fig:stars} em forma de gráficos de radar onde a
 magnitude da média de cada medida é apresentada de forma conjunta para
@@ -240,8 +240,8 @@ grupos e homogeneidade nas matrizes de variâncias e covariâncias. Para
 verificar a normalidade multivariada procedeu-se com o teste de Mardia
 com correção para pequenas amostras [@Korkmaz]. Os resultados são
 apresentados na \autoref{tab:assumptions}. Note que não há sérias
-evidências de assimétria para todos os grupos, pois a hipótese testade é
-a de não assimétria da distribuição, assim para todos os grupos
+evidências de assimetria para todos os grupos, pois a hipótese testada é
+a de não assimetria da distribuição, assim para todos os grupos
 obteve-se níveis descritivos superiores a 0.20. Quando consideramos a
 curtose da distribuição, os dados para os grupos _Pré-históricos_ e
 _Indianos_ apresentaram níveis descritivos do teste que sustentam a
@@ -250,11 +250,11 @@ distribuição é coerente com a distribuição Normal multivariada.
 
 ```{r, results="asis"}
 
-cap <- paste("Teste de Mardia para normalidade mutivariada.",
-             "Estatísticas de teste e respecitvos níveis",
+cap <- paste("Teste de Mardia para normalidade multivariada.",
+             "Estatísticas de teste e respectivos níveis",
              "descritivos entre parênteses.")
 
-## Mutivariate normality by group
+## Multivariate normality by group
 ass1 <- do.call(
     rbind, lapply(
                split(da[, -c(1, 11)], da$grup),
@@ -264,7 +264,7 @@ ass1 <- do.call(
                    s2 <- formatC(res@p.value.small, 4, format = "f")
                    k1 <- formatC(res@z.kurtosis, 3, format = "f")
                    k2 <- formatC(res@p.value.kurt, 4, format = "f")
-                   cbind("Assimétria" = paste(s1, "(", s2, ")"),
+                   cbind("Assimetria" = paste(s1, "(", s2, ")"),
                          "Curtose" = paste(k1, "(", k2, ")"))
                }))
 rownames(ass1) <- levels(da$grup)
@@ -283,7 +283,7 @@ A segunda suposição, de matrizes de variâncias e covariâncias
 iguais para todos os grupos, foi avaliada pelo teste de M de Box
 [@Manly2008] que resultou na estatística `r ass2$stat` com um _p-valor_
 de $`r ass2$p.value`$ o que evidência a rejeição da hipótese nula de
-matrizes de variâncias e covariâncias homôgeneas.
+matrizes de variâncias e covariâncias homogêneas.
 
 Claramente nota-se que algumas suposições não foram atendidas. Aqui
 dar-se-á continuidade ao estudo deixando de lado as suposições. Algumas
@@ -324,7 +324,7 @@ variância multivariada (MANOVA) com as diferentes estatísticas citadas
 anteriormente. Note que todas as estatísticas indicam que há um pelo
 menos um par de vetores de médias diferentes dentro os 10 pares
 possíveis (5 grupos). Esse resultado já era esperado, pois como
-apresentado naas análises descritivas, há grupos bastante distintos.
+apresentado nas análises descritivas, há grupos bastante distintos.
 
 ```{r}
 
@@ -372,18 +372,18 @@ variáveis para os dois grupos é exibida à esquerda. Note que há grande
 similaridade das distribuições, com algumas exceções como para $X_1$
 (comprimento da mandíbula) que tem variabilidade maior para os
 _Pré-históricos_. O mesmo ocorre para $X_4$, $X_6$ e $X_7$. À direita da
-figura têm-se um gráfico de perfil, onde boxplots das nove medidas são
+figura têm-se um gráfico de perfil, onde box-plots das nove medidas são
 apresentados para cada grupo, unindo as médias por linhas. Analogamente
 ao gráfico anterior nota-se para $X_6$ (largura do primeiro molar) a
-maior diferença entre as medidas. Nesse gráfico é nítido que as médidas
-calculadas nos dois grupos são bastante pŕoximas o que evidência que os
+maior diferença entre as medidas. Nesse gráfico é nítido que as médias
+calculadas nos dois grupos são bastante próximas o que evidência que os
 resultados apontados pelos testes de contrastes não é confiável devido a
 não verificação dos pressupostos.
 
 ```{r perfis2, fig.height=5, fig.width=10}
 
 ##----------------------------------------------------------------------
-## Comparação das distribuições das 9 variáveis entre os caes
+## Comparação das distribuições das 9 variáveis entre os cães
 ## tailandeses
 subda_long <- droplevels(
     subset(da_long, grup %in% c("Pré-históricos", "Modernos")))
@@ -510,21 +510,21 @@ variáveis é realizada abaixo:
     - $X_{A4}$: Temperatura mínima (ºF).
 
 * Proporções de mobilidade gênica Pgi:
-    - $X_{G1}$: Para o tipo génetico de Pgi 0.40;
-    - $X_{G2}$: Para o tipo génetico de Pgi 0.60;
-    - $X_{G3}$: Para o tipo génetico de Pgi 0.80;
-    - $X_{G4}$: Para o tipo génetico de Pgi 1.00;
-    - $X_{G5}$: Para o tipo génetico de Pgi 1.16;
-    - $X_{G6}$: Para o tipo génetico de Pgi 1.30;
+    - $X_{G1}$: Para o tipo genético de Pgi 0.40;
+    - $X_{G2}$: Para o tipo genético de Pgi 0.60;
+    - $X_{G3}$: Para o tipo genético de Pgi 0.80;
+    - $X_{G4}$: Para o tipo genético de Pgi 1.00;
+    - $X_{G5}$: Para o tipo genético de Pgi 1.16;
+    - $X_{G6}$: Para o tipo genético de Pgi 1.30;
 
 Para as proporções de mobilidade gênica Pgi $\sum X_{Gi} =
 1$. Na \autoref{fig:splom-ecdf} são apresentados dois gráficos que
-descrevem o corportamente das variáveis ambientais e genéticas. No
+descrevem o comportamento das variáveis ambientais e genéticas. No
 gráfico da esquerda as variáveis ambientais são dispostas em gráficos de
 dispersão aos pares. Observa-se que as colônias GH e GL são as que mais
 diferem das demais colônias, sendo essas colônias de alta altitude e
 baixas temperaturas. No gráfico a direita são apresentadas as proporções
-acumuladas das freqências gênicas registradas em cada colônia. Destes
+acumuladas das frequências gênicas registradas em cada colônia. Destes
 perfis gênicos as colônias que mais se destacam são a GH e LO, que
 acumulam uma proporção maior de mobilidade gênica nos primeiros tipos de
 Pgi (0.4, 0.6 e 1.0).
@@ -696,7 +696,7 @@ positiva entre as distâncias ambientais e genéticas. O procedimento do
 teste é basicamente i) aleatorizar os valores das matrizes e ii)
 calcular o coeficiente de correlação entre as distâncias
 aleatorizadas. Os passos i) e ii) são repetidos $N$ vezes para se obter
-uma dsitribuição empírica das correlações sob a hipótese de correlação
+uma distribuição empírica das correlações sob a hipótese de correlação
 nula e por fim a correlação calculada com base nas distâncias originais
 é confrontada com essa distribuição.
 
@@ -716,13 +716,13 @@ q95 <- round(quantile(dest, 0.95), 4)
 
 A correlação entre as matrizes de distâncias ambientais e genéticas foi
 de `r est`. Foram realizadas 1000 permutações das matrizes e calculadas
-as correlações, cujo o qualtil de 95\% foi de `r q95`. Como $`r est` >
+as correlações, cujo o quantil de 95\% foi de `r q95`. Como $`r est` >
 `r q95`$ há fortes evidências de que as distâncias ambientais
 estejam positivamente correlacionadas com as distâncias genéticas.
 
 Conforme análises apresentadas anteriormente mostra-se que há correlação
 positiva à 5\% entre as variáveis ambientais e genéticas. Porém nessa
-análsie foi negligenciada a posição espacial de cada colônia. Essa
+análise foi negligenciada a posição espacial de cada colônia. Essa
 informação pode estar associada aos resultados obtidos, uma vez que as
 variáveis genéticas podem ser hereditárias e o processo migratório das
 borboletas pode ter ocorrido entre colônias.
@@ -925,7 +925,7 @@ A última visualização apresentada na \autoref{fig:biplot} é o gráfico
 _biplot_ [@Holland2008]. Nesse gráfico os escores de cada taça,
 calculados a partir das componentes principais, são apresentados em um
 gráfico de dispersão conjuntamente com a correlações entre as
-componentes e as variáveis orginais, que são representadas pelos vetores
+componentes e as variáveis originais, que são representadas pelos vetores
 com valores em um eixo adicional. Observe que as taças 23, 24 e 22 se
 destacam pelos valores baixos na primeira componente, isso as
 caracteriza como taças baixas e com relação a segunda componente têm-se
@@ -996,14 +996,14 @@ Uma análise descritiva dos dados é fornecida na
 \autoref{fig:corr-dens}. No gráfico à esquerda são apresentadas as
 correlações entre as nove variáveis, essa é a matriz de correlações
 amostrais a qual será denotada por $R$ nessa seção. Note que, em geral,
-as variáveis apresentam fortes correlações com excessão de $X_9$ (frutas
+as variáveis apresentam fortes correlações com exceção de $X_9$ (frutas
 e vegetais) cujo a correlação mais expressiva foi de apenas `r R[4, 9]`
 ocorrida com $X_4$ (leite). Para as demais variáveis a correlação maior
 correlação positiva foi entre $X_6$ e $X_8$ (`r R[6, 8]`) o que indica
 altos consumos de proteínas de cereais é acompanhada de consumos altos
-de grãos, nozes e sementes oleaginosas. E a maior corrrelação negativa
+de grãos, nozes e sementes oleaginosas. E a maior correlação negativa
 ocorre entre $X_3$ e $X_6$ indicando que valores de consumo altos de
-proteínas provenientes de ovos estão realacionados a valores baixo de
+proteínas provenientes de ovos estão relacionados a valores baixo de
 consumo de proteínas provenientes de cerais e vice-e-versa.
 
 A direita da \autoref{fig:corr-dens} são apresentadas as densidades
@@ -1012,7 +1012,7 @@ podem ser razoavelmente ajustadas por uma distribuição Normal, ou seja,
 seus valores estão razoavelmente dispostos em acima e abaixo da
 média. Para algumas variáveis nota-se uma bimodalidade mais acentuada,
 por exemplo $X_2$ (carne branca) e $X_9$ (frutas e vegetais), e outras
-apresentam certo grau de assimétria, por exemplo $X_5$ (peixe), $X_6$
+apresentam certo grau de assimetria, por exemplo $X_5$ (peixe), $X_6$
 (cereais) e $X_7$ (carboidratos).
 
 ```{r corr-dens, fig.height=5, fig.width=10, fig.cap="Representação da matriz de correlação dos dados (esquerda) e distribuições marginais empíricas das variáveis originais (direita)."}
@@ -1123,7 +1123,7 @@ esquerda da \autoref{fig:fact-plot}. Note que os resíduos variam de
 -0.10 a 0.10 centrados e pouco dispersos em torno de 0 (boxplot
 superior) o que indica um bom ajuste . Na matriz de resíduos (heatmap
 inferior) pode-se verificar os resíduos para cada par de variáveis. Na
-diagonal da matrix são apresentadas as variâncias específicas
+diagonal da matriz são apresentadas as variâncias específicas
 (complementar das comunalidades) e da mesma forma indicam um bom ajuste.
 
 Avaliando os coeficientes dos fatores no modelo expresso em
@@ -1136,7 +1136,7 @@ vez que todos contribuem significativamente para explicação de alguma
 variável. Nas equação que descrevem as demais variáveis há uma
 composição de pelo menos 2 dos 4 fatores.
 
-Ainda avaliando a \autoref{eqn:factors} é conveniente rótular os fatores,
+Ainda avaliando a \autoref{eqn:factors} é conveniente rotular os fatores,
 avaliando as cargas estimados de um fator para todas as variáveis. Por
 exemplo $F_1$ tem as maiores cargas para $X_1$ (carne vermelha), $X_3
 (ovos)$, $X_4$ (leite) e $X_6$ (cereais), coeficientes
@@ -1239,17 +1239,17 @@ print(xy3, position = c(0.5, 0.05, 1.0, 0.97), more = FALSE)
 
 ```
 
-Na \autoref{tab:scores-fat} são apresentaos os escores calculados para
+Na \autoref{tab:scores-fat} são apresentados os escores calculados para
 cada um dos 25 países europeus. Com os valores disposto nessa tabela
 pode-se caracterizar a "habilidade", em termos de consumo de proteínas,
-de cada país atráveis de seus escores obtidos. Uma visualização dos
+de cada país através de seus escores obtidos. Uma visualização dos
 escores dispostos na \autoref{tab:scores-fat} é realizada no gráfico à
 direita na \autoref{fig:fact-plot}, em que os escores dos fatores são
 apresentados dois a dois em gráficos de dispersão. Linhas que delimitam
 os quadrantes são úteis para interpretação. Para todos os gráficos de
 dispersão os 3 países mais distantes dos demais tem seus nomes
 apresentados. Note que, quanto ao consumo de proteínas, não há nenhum
-país foretemente discrepante da maioria, isso pode ser observado pelas
+país fortemente discrepante da maioria, isso pode ser observado pelas
 densidades empíricas apresentadas para os escores de cada fator.
 
 ```{r, results="asis"}
@@ -1311,7 +1311,7 @@ variáveis mensuradas são:
 
  * $X_1$ Comprimento da mandíbula (mm).
  * $X_2$ Largura da mandíbula, abaixo do primeiro molar (mm).
- * $X_3$ Largura do côndilo aricular (mm).
+ * $X_3$ Largura do côndilo auricular (mm).
  * $X_4$ Altura da mandíbula, abaixo do primeiro molar (mm).
  * $X_5$ Comprimento do primeiro molar (mm).
  * $X_6$ Largura do primeiro molar (mm).
@@ -1375,18 +1375,18 @@ print(xy2, split = c(2, 1, 2, 1), more = FALSE)
 
 ```
 
-Para possibilitar uma interpretação das variáveis canôninas, além da
+Para possibilitar uma interpretação das variáveis canônicas, além da
 discriminação dos grupos a \autoref{tab:scores-fat} apresenta as
 correlações das variáveis originais com as variáveis
 canônicas. Observa-se que a variável LD1 tem correlações positivas, mas
 não fortes, com todas as variáveis originais exceto $X_7$ (comprimento
-do primeiro ao terceiro molar) então pode-se intrepretá-la como tamanho
-da arcada dentária em contraste com o comprimeiro do 1º ao 3º molar; LD2
+do primeiro ao terceiro molar) então pode-se interpretá-la como tamanho
+da arcada dentária em contraste com o comprimento do 1º ao 3º molar; LD2
 tem todas as correlações fortes e negativas o que pode ser interpretado
 como o inverso do tamanho da arcada dentária. Interpretações similares
 podem ser realizadas com as demais variáveis canônicas e novamente um
 conhecimento do estudo é imprescindível nessa etapa. Com as
-interpretações das variáveis canôninas LD1 e LD2 pode-se voltar ao
+interpretações das variáveis canônicas LD1 e LD2 pode-se voltar ao
 gráfico de dispersão, à direita na \autoref{plot-discrim} e interpretar
 a posição dos grupo. Por exemplo o grupo dos _Cuons_ apresentou valores
 altos de LD1 o que indica que são cães com arcada dentária grande quando
@@ -1422,7 +1422,7 @@ Na \autoref{tab:errors} são apresentadas as classificações provenientes
 da análise discriminante, que são realizadas pela probabilidade a
 posteriori da observação pertencer a cada grupo calculada conforme
 Teorema de Bayes. Nessa tabela têm-se a predição na própria base de
-treino, o que potenciamente subestima o erro de classificação, e a
+treino, o que potencialmente subestima o erro de classificação, e a
 predição quando considerada a abordagem \textit{leave-one-out}, em que
 ajusta-se o modelo de classificação sem retira a i-ésima observação e
 posteriormente a classifica. Note que considerando ambas as matrizes
@@ -1521,7 +1521,7 @@ No exemplo dessa seção a dimensão de $\underline{x}_i$ é
 $9\times 1$, todavia como temos poucas observações em cada grupo canino
 procedeu-se com o algoritmo _stepwise_ com critério AIC para seleção de
 variáveis. Nesse algoritmo define-se o maior e menor modelo e o
-algortimo irá, a partir do maior, retirar e recolar variáveis conforme
+algoritmo irá, a partir do maior, retirar e recolar variáveis conforme
 menor AIC. O algoritmo foi executado definindo o menor modelo como o
 modelo sem covariáveis e o maior modelo aquele contendo as nove de forma
 aditiva.
@@ -1535,8 +1535,8 @@ diante. Note que as estimativas dos efeitos para os modelos dos grupos
 _Chacais_ e _Indianos_ são demasiadamente altas, isso ocorreu devido a
 probabilidades ajustadas como 1 e/ou 0, ou seja, nesse conjunto de
 variáveis há um hiperplano que separa perfeitamente machos de
-femêas. Isso é um problema estimação na borda do espaço paramétrico que
-causa não convergência do algortimo de estimação. O único grupo em que
+fêmeas. Isso é um problema estimação na borda do espaço paramétrico que
+causa não convergência do algoritmo de estimação. O único grupo em que
 não se pôde discriminar machos e fêmeas através da regressão logística
 foi o grupo dos cães _Cuons_, observe que nenhuma variável foi
 selecionada para esse grupo, ou seja, a probabilidade de cães fêmeas
@@ -1651,7 +1651,7 @@ print(xy2, position = c(0.55, 0.0, 1.0, 1.0), more = FALSE)
 
 A análise de agrupamento desses dados será realizada sob duas
 perspectivas. Na primeira agruparemos as espécies, avaliando as
-similaridades das medidas de abundâncias dsitribuídas nos 17 diferentes
+similaridades das medidas de abundâncias distribuídas nos 17 diferentes
 lotes. Sob a segunda perspectiva serão agrupados os lotes, a fim de
 identificar grupos de lotes que tem abundância de espécies similares.
 
@@ -1711,7 +1711,7 @@ rect.dendrogram(dendr_lote, k = k_lote, horiz = FALSE,
 Na \autoref{fig:dendro} são apresentados os resultados da análise de
 agrupamentos para as espécies (à direita) e para os lotes (à
 esquerda). Sem um apelo aplicado, neste trabalho optou-se pela adoção de
-um algoritmo altomático para a definição do número de grupos. A
+um algoritmo automático para a definição do número de grupos. A
 definição do número de grupos deu-se pelos grupos formados na maior
 distância de ligação. Para espécies foram tomados três grupos e para os
 lotes dois.
@@ -1784,9 +1784,9 @@ grupos de indústria.
 Denotaremos o conjunto de variáveis de consumo de proteínas por $X_i$,
 em que $i=1$ representa o consumo de proteínas provenientes de carne
 vermelha; $i=2$ de carne branca; $i=3$ de ovos; $i=4$ de leite; $i=5$ de
-peixe; $i=6$ de cereiais; $i=7$ de carboidratos; $i=8$ de grãos, nozes e
+peixe; $i=6$ de cereais; $i=7$ de carboidratos; $i=8$ de grãos, nozes e
 óleo de linhaça; e $i=9$ de frutas e verduras. E o conjunto de variáveis
-sobre a força de trabalho será $Y_j$ sendo em $j=1$ a procentagem de
+sobre a força de trabalho será $Y_j$ sendo em $j=1$ a porcentagem de
 força de trabalho empregada em agricultara ; $j=2$ em mineração e
 exploração de pedreiras; $j=3$ em fabricação; $j=4$ em fornecimento de
 energia e água; $j=5$ em construção; $j=6$ em serviços; $j=7$ em
@@ -1819,7 +1819,7 @@ rect(0.5, 0.5, 9.5, 9.5, border = cols[2], lwd = 2)
 ```
 
 As correlações dentre as variáveis $X_i$ e $Y_j$, $i,j=1,2,\ldots,9$ é
-apresentada na \autoref{fig:corr18}. A diagnonal secundária da matriz de
+apresentada na \autoref{fig:corr18}. A diagonal secundária da matriz de
 correlações é destaca na figura para enfatizar que em análise de
 correlação canônica estamos resumindo todas essas correlações. Em geral,
 nota-se que há mais correlações fortes entre as variáveis de um mesmo
@@ -1868,7 +1868,7 @@ correlações são todas positivas com exceção de $X_6$ (consumo de
 proteína de cereais) e $X_8$ (consumo de proteína de grão, nozes e óleo
 de linhaça), então pode-se interpretar essa variável como um contraste
 do consumo total de proteínas contra o consumo devido a proteínas
-provenientes de cereias, grãos, nozes e linhaça. A variável canônica
+provenientes de cereais, grãos, nozes e linhaça. A variável canônica
 $V_1$ é basicamente expressa pelo contraste de $Y_1$ (porcentagem
 empregada a agricultura) e $Y_2$ (porcentagem empregada com mineração)
 versus $Y_6$ (porcentagem empregada com serviços) e $Y_8$ (porcentagem
@@ -1998,7 +1998,7 @@ construção; serviços; finanças; serviços sociais e pessoais; e
 transportes e comunicações). Como aqui só considera-se os dados sobre
 empregos, há dados sobre 30 países.
 
-Vale ressaltar que em análises não didátivas têm-se apenas essa matriz
+Vale ressaltar que em análises não didáticas têm-se apenas essa matriz
 de dados observados, é incomum e não recomendável trabalhar somente com
 as distâncias quando se tem os dados originais.
 
@@ -2074,8 +2074,8 @@ distâncias apresentada na \autoref{fig:dist-mult}.
 A representação das observações nas dimensões obtidas é apresenta na
 \autoref{fig:dimen-plot} (à esquerda). Esse gráfica apresenta as
 observações nas coordenadas de cada dimensões. Nota-se que algumas
-dimensões podem ser intepretadas, por exemplo a dimensão 1 $D_1$, separa
-bem os países do Leste europeu dos demais. Ao invertigar a tabela de
+dimensões podem ser interpretadas, por exemplo a dimensão 1 $D_1$, separa
+bem os países do Leste europeu dos demais. Ao investigar a tabela de
 dados observa-se que países do leste investem mais força de trabalho em
 agricultura, florestal e pesca e em mineração e exploração de pedreira e
 tem porcentagens baixas para serviços.
