@@ -10,7 +10,7 @@ add.alpha <- function(col, alpha = 1){
 ## Define Colors
 mycol <- c(1, "#377EB8", "#E41A1C", "#4DAF4A",
            "#ff00ff", "#FF7F00", "#984EA3", "#FFFF33", "#808080")
-myreg <- colorRampPalette(c("gray90",  "gray50", "gray10"))(100)
+myreg <- colorRampPalette(c(mycol[3],  "gray90", mycol[2]))(100)
 
 ## Trellis graphical style.
 ps <- list(
