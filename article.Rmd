@@ -1,0 +1,257 @@
+---
+title: 'Análise de agrupamento aplicada aos resumos dos papers apresentados no evento KDD2016'
+academic: Eduardo Elias Ribeiro Junior
+email: 'edujrrib@gmail.com'
+chair: LCE5859 - Métodos Estatísticos Multivariados
+institute: 'Escola Superior de Agricultura Luiz de Queiroz - USP'
+date: '\today'
+logo: "configs/logo-esalq.png"
+bibliography: lce5859-mem.bib
+csl: configs/abntcite.csl
+output:
+  bookdown::pdf_document2:
+    template: configs/template.tex
+    keep_tex: false
+---
+
+\begin{center}
+  \large Eduardo Elias Ribeiro Junior\footnote{LCE}
+\end{center}
+\vspace{0.5cm}
+
+\begin{abstract}
+
+Em Machine Learning têm-se em diversas situações o interesse em realizar
+predições a partir de algoritmos computacionais que independam da ação
+humana. Uma das mais comuns tarefas preditivas no campo aplicado é a de
+classificação. Neste trabalho apresentamos um rol de técnicas de
+classificação binária aplicadas a um conjunto de dados do repositório
+UCI Machine Learning que refere-se a classificação de e-mails em
+\texttt{spam} ou \texttt{não-spam}. As técnicas de classificação
+apresentadas e aplicadas permeiam os campos de Estatística Multivariada,
+Machine Learning e Inferência Paramétrica. Foram ao todo 11 técnicas de
+classificadas sob o qual a abordagem via Random Forest (árvores de
+decisão aleatórias) apresentou o melhor desempenho considerando resumos
+da curva ROC obtidos de classificações na base de teste e nas amostras
+de validação cruzada.
+
+\vspace{0.2cm}
+\noindent
+\textbf{Palavras-chave: }{\it Classificação, Análise Discriminante,
+Regressão Logística, Árvores de decisão, Random Forest, Bagging,
+Boosting, SVM}.
+
+\end{abstract}
+
+\pagebreak
+
+```{r, include=FALSE}
+
+##----------------------------------------------------------------------
+## Reports
+library(knitr)
+library(xtable)
+opts_chunk$set(
+    warning = FALSE,
+    message = FALSE,
+    cache = FALSE,
+    echo = FALSE,
+    results = "hide",
+    fig.width = 7,
+    fig.height = 5,
+    fig.align = "center",
+    fig.pos = "H",
+    out.width = "1\\textwidth",
+    dev.args = list(
+        family = "Palatino")
+    )
+options(
+    digits = 3,
+    xtable.comment = FALSE,
+    xtable.caption.placement = "top",
+    xtable.table.placement = "ht",
+    xtable.sanitize.text.function = identity
+)
+
+##----------------------------------------------------------------------
+## Packages
+
+library(magrittr)
+library(SnowballC)
+library(tm)
+
+## For graphics
+library(wordcloud)
+library(lattice)
+library(latticeExtra)
+source("configs/setup.R")
+cols <- trellis.par.get("superpose.line")$col
+
+##----------------------------------------------------------------------
+## Functions
+text2dtm <- function(text) {
+    text %>%
+        VectorSource %>%
+        Corpus %>%
+        tm_map(removeWords,
+               c(stopwords("english"),
+                 "can")) %>%
+        tm_map(removePunctuation) %>%
+        tm_map(stripWhitespace) %>%
+        tm_map(removeNumbers) %>%
+        tm_map(stemDocument) %>%
+        DocumentTermMatrix
+}
+
+```
+
+\pagebreak
+
+# Introdução #
+
+# Material e Métodos #
+
+```{r}
+
+##----------------------------------------------------------------------
+## Read and organize data
+
+## Data long, each line is paper combine with topic (duplicate papers)
+data_long <- read.table(
+    file = "./data/kdd-papers.txt",
+    header = TRUE,
+    sep = ";",
+    colClasses = c("factor", "character", "character")
+)
+
+## Data short, each line is unique paper
+data_short <- data_long[!duplicated(data_long$title), -1]
+data_short <- within(data_short, {
+    ntopics = sapply(title, function(x) sum(x == data_long$title))
+})
+
+## Texts, using title and abstract texts
+data_texts <- with(data_short, paste(title, abstract))
+
+## Tranform to document-term matrix
+dtm_texts <- text2dtm(data_texts)
+
+```
+
+Os dados utilizados na análise correspondem aos textos dos títulos,
+resumos e palavras-chave dos artigos publicados no SIGKDD 2016, além dos
+tópicos atribuídos aos artigos pelos organizadores do evento. Na
+\autoref{fig:webscrap} exibe-se as páginas _web_ que
+
+O conjunto de dados analisados referem-se aos artigos apresentados na
+22nd SIGKDD Conference realizada entre os dias 13 e 17 de agosto de 2016
+sob organização da Association for Computing Machinery (ACM). As
+informações sobre os artigos aceitos no SIGKDD estão disponíveis no
+sítio eletrônico \url{http://www.kdd.org/kdd2016/}. A
+\autoref{fig:webscrap} ilustra a disposição das informações no sítio
+eletrônico do evento. Os dados utilizados na análise correspondem aos
+textos dos títulos e resumos dos artigos (destacados em vermelho na
+figura), além dos tópicos atribuídos aos artigos pelos organizadores do
+evento (destacados em azul).
+
+```{r webscrap, out.width="0.8\\textwidth", results="asis", fig.cap="Sítio do SIGKDD2016 de onde foram extraídos os títulos, resumos e tópicos."}
+
+## Web pages images
+include_graphics("images/webscrap.pdf")
+
+```
+
+Para extração dos dados utilizou-se as ferramentes para raspagem de
+dados web disponíveis pelo pacote `rvest` [@pack-rvest] do
+software R. O processo de extração se deu em três passos, devido a
+disposição das informações conforme \autoref{fig:webscrap}:
+
+1. Obtenção dos links para as páginas dos tópicos;
+1. Obtenção dos links para as páginas dos artigos;
+1. Obtenção das informação de título, resumo e tópicos para cada
+   página de cada artigo.
+
+```{r}
+
+##----------------------------------------------------------------------
+## Descriptive analysis
+mat_texts <- as.matrix(dtm_texts)
+counts <- colSums(mat_texts)
+
+## Frequency tables
+freq_papers <- table(data_long$topic)
+freq_topics <- table(paste(data_short$ntopics, "Tópico(s)"))
+
+```
+
+Ao todo foram `r nrow(data_long)` páginas consultadas, referentes à
+`r nrow(data_short)` artigos. Na \autoref{tab:freq} são apresentadas os
+`r nlevels(data_long$topic)` tópicos definidos pelos organizadores do
+SIGKDD e o número de artigos cujo atribuiu-se cada respectivo
+tópico. Note que nessa tabela a soma de artigos não representa o número
+de artigos únicos apresentados no evento, pois mais de um tópico pode
+ser atrubuído ao mesmo artigo (veja a \autoref{fig:webscrap}). Das
+atribuições de tópicos pelos organizadores foram `r freq_topics` artigos
+com 1, 2, 3, 4, 5 e 6 tópicos atribuídos respectivamente. Observe também
+que há uma moderada predominância de artigos cujo foram atrubuídos os
+três primeiros tópicos, ainda com apenas os 9 tópicos mais frequentes
+têm-se aproximadamente 86\% de todas as atribuições.
+
+```{r, results="asis"}
+
+aux <- sort(freq_papers, decreasing = TRUE)
+tab_freq <- data.frame("Tópico" = names(aux),
+                       "Nº de artigos" = c(aux),
+                       "Freq. absoluta" = c(aux)/sum(c(aux)),
+                       "Freq. acumulada" = cumsum(c(aux)/sum(c(aux))),
+                       check.names = FALSE,
+                       stringsAsFactors = FALSE)
+
+tab_freq <- rbind(tab_freq, c(NA, colSums(tab_freq[, -1])[-3], NA))
+tab_freq[17, 1] <- "\\textbf{Total}"
+rownames(tab_freq) <- c(1:nlevels(data_long$topic), "")
+
+## Build latex table
+cap <- c("Frequência de artigos em cada tópico definido no evento.")
+print(xtable(tab_freq, digits = c(0, 0, 0, 3, 3),
+             align = c("llccc"),
+             caption = cap,
+             label = "tab:freq"))
+
+```
+
+Após extração realizou-se a higienização dos textos que consistiu na
+remoção das palavras de parada (preposições, artigos, conjunções, etc.),
+da pontuação, dos espaços em branco e dos números. Além da remoção
+desses caracteres, realizou-se a radicalização das palavras restantes
+utilizando o algoritmo de Poter [@porter2001]. Do processo de
+higienização descrito, restaram `r length(tm::Terms(dtm_texts))`
+palavras distintas em todos os textos.
+
+Na \autoref{fig:wordcloud} são apresentados os 5\% termos mais
+frequentes em todos os textos. Note que os termos mais frequentes são
+realmente àqueles utilizadas no ambiente de Knowledge Discovery and Data
+Mining. Destaque para as palavras **model** e **data**, o que reflete a
+característica do evento em discutir estudos aplicados.
+
+```{r wordcloud, out.width="0.7\\textwidth", fig.height=5, fig.width=12, fig.cap="Nuvem dos 5\\% termos mais frequentes nos textos extraídos dos resumos e títulos dos artigos apresentados no SIGKDD 2016."}
+
+## Wordcloud
+paleta <- brewer.pal(9, "Greys")[-(1:4)]
+corte <- quantile(counts, probs = 0.95)
+wnames <- names(counts)[counts > corte] %>%
+    stringi::stri_trans_general(id = "latin-ascii")
+cnames <- counts[counts > corte]
+wordcloud(words = wnames,
+          freq = cnames,
+          min.freq = 1,
+          random.order = FALSE,
+          colors = paleta,
+          family = "serif")
+
+```
+
+# Referências #
+
+\setlength\parindent{0pt}
+\small
