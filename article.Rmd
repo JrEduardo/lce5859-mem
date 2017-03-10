@@ -1,5 +1,5 @@
 ---
-title: 'Análise de agrupamento aplicada aos resumos dos papers apresentados no evento KDD2016'
+title: 'Análise de agrupamento aplicada aos resumos dos papers apresentados no evento SIGKDD2016'
 academic: Eduardo Elias Ribeiro Junior
 email: 'edujrrib@gmail.com'
 chair: LCE5859 - Métodos Estatísticos Multivariados
@@ -21,25 +21,13 @@ output:
 ---
 
 \begin{center}
-  \large Eduardo Elias Ribeiro Junior\footnote{LCE}
+\large Eduardo Elias Ribeiro Junior$^\ast$\footnote{Contato:
+<edujrrib@gmail.com>/<jreduardo.usp.br>}\\
+$^*$ Departamento de Ciências Exatas LCE ESALQ-USP / LEG-UFPR
 \end{center}
 \vspace{0.5cm}
 
 \begin{abstract}
-
-Em Machine Learning têm-se em diversas situações o interesse em realizar
-predições a partir de algoritmos computacionais que independam da ação
-humana. Uma das mais comuns tarefas preditivas no campo aplicado é a de
-classificação. Neste trabalho apresentamos um rol de técnicas de
-classificação binária aplicadas a um conjunto de dados do repositório
-UCI Machine Learning que refere-se a classificação de e-mails em
-\texttt{spam} ou \texttt{não-spam}. As técnicas de classificação
-apresentadas e aplicadas permeiam os campos de Estatística Multivariada,
-Machine Learning e Inferência Paramétrica. Foram ao todo 11 técnicas de
-classificadas sob o qual a abordagem via Random Forest (árvores de
-decisão aleatórias) apresentou o melhor desempenho considerando resumos
-da curva ROC obtidos de classificações na base de teste e nas amostras
-de validação cruzada.
 
 \vspace{0.2cm}
 \noindent
@@ -121,25 +109,25 @@ e poder de armazenagem, estão mantidos em diversos mídias (servidores,
 unidades de disco, pendrives, etc.) ao redor do mundo. Esse conhecimento
 é transcrito em diferentes produtos como artigos científicos, páginas
 web, blogs, vídeos entre outros. Todavia, quanto maior a quantidade de
-conteúdo maior a dificuldade de organização deste.
+conteúdo maior a dificuldade para sua organização.
 
-Para organização desses produtos há diversos esforços voltados à análise
-de texto, uma vez que das mídias citadas as mais comuns são expressas em
-forma de texto (como artigos, posts, livros, etc.). Dificuldades para
-análise ou mineração de textos são frequentes e estão presentes desde a
-coleta dos dados até a escolha da técnica adequada para análise e
-interpretação dos resultados.
+Na tentativa de organizar esses produtos há diversos esforços voltados à
+análise de texto, uma vez que, das mídias citadas as mais comuns são
+expressas em forma de texto (como artigos, posts, livros,
+etc.). Dificuldades para análise ou mineração de textos são frequentes e
+estão presentes desde a coleta dos dados até a escolha da técnica
+adequada para análise e interpretação dos resultados.
 
 Na mineração de dados textuais pode-se listar duas estratégias
 principais i) _Bag of words_ em que a semântica do texto é desfeita e a
-estrutura linguística ignorada, os textos são representados pela
-frequência ou ocorrência das palavras; e ii) _Natural Precessing
-Language (NLP)_ em que as palavras são caracterizadas pelo seu sentido
-morfológico e os textos são analisados considerando elementos da
-linguagem [@Berry2010]. A estratégia via _bag o words_, embora simples,
-é extremamente útil e mais comum. Os principais objetivos sob essa
-estratégia são agrupamento, classificação e predição de textos
-[@Silge2017] embora outros possam existir.
+estrutura linguística ignorada, sob essa abordagem os textos são
+representados pela frequência ou ocorrência das palavras; e ii) _Natural
+Precessing Language (NLP)_ em que as palavras são caracterizadas pelo
+seu sentido morfológico e os textos são analisados considerando
+elementos da linguagem [@Berry2010]. A estratégia via _bag o words_,
+embora simples, é extremamente útil e mais comum. Os principais
+objetivos sob essa estratégia são agrupamento, classificação e predição
+de textos [@Silge2017] embora outros possam existir.
 
 Uma aplicação direta da análise de texto pode ser pensada para a
 comunidade acadêmica. Comumente eventos da comunidade científica reúnem
@@ -213,13 +201,6 @@ resumos dos artigos (destacados em vermelho na figura), além dos tópicos
 atribuídos aos artigos pelos organizadores do evento (destacados em
 azul).
 
-```{r webscrap, out.width="0.8\\textwidth", results="asis", fig.cap="Sítio do SIGKDD2016 de onde foram extraídos os títulos, resumos e tópicos."}
-
-## Web pages images
-include_graphics("images/webscrap.pdf")
-
-```
-
 Para extração dos dados utilizou-se as ferramentes para raspagem de
 dados web disponíveis pelo pacote `rvest` [@pack-rvest] do
 software R. O processo de extração se deu em três passos, devido a
@@ -229,6 +210,13 @@ disposição das informações conforme \autoref{fig:webscrap}:
 1. Obtenção dos links para as páginas dos artigos;
 1. Obtenção das informação de título, resumo e tópicos para cada
    página de cada artigo.
+
+```{r webscrap, out.width="0.8\\textwidth", results="asis", fig.cap="Sítio do SIGKDD2016 de onde foram extraídos os títulos, resumos e tópicos."}
+
+## Web pages images
+include_graphics("images/webscrap.pdf")
+
+```
 
 ```{r}
 
@@ -246,15 +234,15 @@ freq_topics <- table(paste(data_short$ntopics, "Tópico(s)"))
 Ao todo foram `r nrow(data_long)` páginas consultadas, referentes à
 `r nrow(data_short)` artigos. Na \autoref{tab:freq} são apresentadas os
 `r nlevels(data_long$topic)` tópicos definidos pelos organizadores do
-SIGKDD e o número de artigos cujo atribuiu-se cada respectivo
-tópico. Note que nessa tabela a soma de artigos não representa o número
-de artigos únicos apresentados no evento, pois mais de um tópico pode
-ser atrubuído ao mesmo artigo (veja a \autoref{fig:webscrap}). Das
-atribuições de tópicos pelos organizadores foram `r freq_topics` artigos
-com 1, 2, 3, 4, 5 e 6 tópicos atribuídos respectivamente. Observe também
-que há uma moderada predominância de artigos cujo foram atrubuídos os
-três primeiros tópicos, ainda com apenas os 9 tópicos mais frequentes
-têm-se aproximadamente 86\% de todas as atribuições.
+SIGKDD e o número de artigos pertencentes a cada respectivo tópico. Note
+que nessa tabela a soma de artigos não representa o número de artigos
+únicos apresentados no evento, pois mais de um tópico pode ser atrubuído
+ao mesmo artigo (veja a \autoref{fig:webscrap}). Observe também que há
+uma moderada predominância de artigos cujo foram atrubuídos os três
+primeiros tópicos, ainda com apenas os 9 tópicos mais frequentes têm-se
+aproximadamente 86\% de todas as atribuições. Das atribuições de tópicos
+pelos organizadores foram `r freq_topics` artigos com 1, 2, 3, 4, 5 e 6
+tópicos atribuídos, respectivamente
 
 ```{r, results="asis"}
 
@@ -279,19 +267,157 @@ print(xtable(tab_freq, digits = c(0, 0, 0, 3, 3),
 
 ```
 
-Após extração realizou-se a higienização dos textos que consistiu na
-remoção das palavras de parada (preposições, artigos, conjunções, etc.),
-da pontuação, dos espaços em branco e dos números. Além da remoção
-desses caracteres, realizou-se a radicalização das palavras restantes
-utilizando o algoritmo de Poter [@porter2001]. Do processo de
-higienização descrito, restaram `r length(tm::Terms(dtm_texts))`
-palavras distintas em todos os textos.
+# Metodologia #
 
-Na \autoref{fig:wordcloud} são apresentados os 5\% termos mais
-frequentes em todos os textos. Note que os termos mais frequentes são
-realmente àqueles utilizadas no ambiente de Knowledge Discovery and Data
-Mining. Destaque para as palavras **model** e **data**, o que reflete a
-característica do evento em discutir estudos aplicados.
+Muito da análise de texto, não fundamentada em modelos estatísticos, é
+realizada via técnicas multivariadas. Para atender o objetivo proposto
+nesse trabalho faz-se uso de técnicas multivariadas de redução de
+dimensionalidade via componentes principais (_PCA_) e de análise de
+agrupamento via algoritmo de _k-means_. Nessa seção são apresentados os
+métodos aplicados ao conjunto de textos a fim agrupá-los de forma
+satisfatória.
+
+## Organização de textos para análise ##
+
+Uma importante e não trivial etapa no processo de análise de textos é a
+adequação dos textos para análise. Conforme descrito na
+\autoref{introducao} a abordagem via _bag of words_, transforma os
+textos em uma matrix $\mathbb{X}$, cujo linhas são os documentos,
+colunas são os termos e os valores representam as frequências dos termos
+nos documentos. Para obtenção dos termos faz-se a higienização dos
+textos que consiste na remoção das palavras de parada (preposições,
+artigos, conjunções, etc.), da pontuação, dos espaços em branco e dos
+números. Além da remoção desses caracteres, faz-se a radicalização das
+palavras, para que palavras de mesmo sentido sejam associadas ao mesmo
+termo, por exemplo as `clustering`, `cluster`, `clusterization`,
+`clustered` possuem todas o mesmo radical, `cluster`, portanto ficam
+todas associadas ao termo `cluster`. Existem vários algoritmos para
+radicalização, nesse trabalho utilizou-se o algoritmo de Poter
+[@porter2001].
+
+## Redução de dimensionalidade via componentes principais ##
+
+Não raramente a matriz termo-documento de frequências é retangular
+possuindo um número de colunas (termos) muito maior que o número de
+linhas (documentos), além de ser razoavelmente esparsa. Assim é de
+interesse em análise de texto a redução do número de colunas da matriz
+termo-documento $\mathbb{X}$. Uma técnica multivariada, cujo um dos
+objetivos é a redução de dimensionalidade é chamada de análise de
+componentes principais, que consiste construção de novas variáveis
+denominadas componentes principais a partir da decomposição da matriz de
+covariância ou correlação de $\mathbb{X}$ [@Friedman2001].
+
+Para apresentação do método tome $\mathbf{R}$ como a matriz de
+correlações de $\mathbb{X}$, de dimensão $p\times p$. $\mathbf{R}$ pode
+ser escrita como $\mathbf{E} \Lambda \mathbf{E}^t$ ($\mathbf{R} =
+\mathbf{E} \Lambda \mathbf{E}^t$), em que $\Lambda$ é a matriz diagonal
+dos autovalores $\lambda_i$, $i=1,\ldots ,p$ da matriz $\mathbb{X}$, ou
+seja, $\Lambda=\text{diag}(\underline{\lambda})$; e $\mathbf{E}$ é a
+matriz dos autovetores $\underline{e}_i$, $i=1,\ldots ,p$. Assim as
+novas variáveis, denominadas componentes principais são dadas por
+$\underline{z}_i=\mathbb{X}\underline{e}_i$, para $i=1, \ldots, p$.
+
+Note que são calculadas tantas componentes quanto for o número de
+variáveis, porém apenas um subconjunto dessas componentes já é
+suficiente para explicar boa parte da variação total dos dados originais
+$\mathbb{X}$. O percentual da variância explicada pela i-ésima
+componente é dada por $\lambda_i/\sum_{j=1}^p \lambda_j$.
+
+A redução de dimensionalidade ocorre por tomar a matriz de componentes
+principais $\mathbf{Z}$, com $m$ componentes, necessárias para
+explicar um percentual arbitrário da variação total, $m<<p$, ao invés da
+matriz $\mathbb{X}$. Embora @Manly2008 sugira que a análise de
+agrupamento realizada sobre componentes principais deva ser evitada, em
+problemas _"small n large p"_ essa é uma solução comumente utilizada.
+
+## Agrupamento K-means ##
+
+Métodos de agrupamento visam agrupar as observações de um conjunto de
+dados em grupos, cujo as observação de um grupo sejam similares e as
+observações de grupos distintos sejam distintas. Existem métodos de
+agrupamentos hieráquicos e não-hierárquicos. Nos hierárquicos
+normalmente se define o número de grupos a partir de um dendrograma,
+essa escolha é geralmente subjetiva e priorizasse, nesses casos, a
+interpretação dos grupos formados. Para os não-hierárquicos o número de
+grupos deve ser informado previamente e então um algoritmo atribuirá as
+observação aos grupos.
+
+
+O método não-hierárquico mais comumente utilizado é o chamado método de
+k-means [@Hartigan1979]. Nesse trabalho utiliza-se método de agrupamento
+não-hierárquico supra-citado. O \autoref{alg:kmeans} descreve o
+procedimento para formação dos grupos via _k-means_. Note que nos dados
+de entrada do algoritmo o número de grupos a serem formados e os
+dados devem ser específicados.
+
+\begin{algorithm}[H]
+  \caption{Agrupamento não-hierárquico de k-means.}
+  \label{alg:kmeans}
+  \SetAlgoLined
+  \Entrada{\\
+    \hspace{0.5cm}$k:$ número de grupos a serem formados (escalar
+    inteiro);\\
+    \hspace{0.5cm}$\mathbf{X}:$ conjunto de dados (matriz $n\times
+    p$).\\
+  }
+  \Saida{\\
+    \hspace{0.5cm}$\underline{g}:$ a atribuição dos grupos a cada
+    observação (vetor de tamanho $n$);\\
+  }
+  \BlankLine
+  \BlankLine
+  Atribua aleatoriamente as observações aos grupos;\\
+  \While{As atribuições dos grupos não for a mesma.}{\label{line:while}
+    \textbf{(a)} Para cada grupo $k$ calcule o seu centróide. O
+    centróide do $k$-ésimo grupo é dado pelo vetor média das $p$
+    variáveis calculado das observação pertencentes a esse grupo;\\
+    \textbf{(b)} Atribua cada observação ao grupo, cujo tem o centróide
+     mais próximo, a proximidade é dada distância euclidiana entre o
+     centróide e o vetor de variáveis da observação
+  }
+\end{algorithm}
+\vspace{0.5cm}
+
+Conforme visto no \autoref{alg:kmeans} o número de grupos $k$ deve ser
+informado a priori, para avaliação do agrupamento realizado com $k$
+grupos pode-se verificar as medidas de homogeneidade dos grupos e
+heterogeneidade entre grupos. A homogeneidade é dada pelo inverso da
+soma de quadrados das observações alocadas em um mesmo grupos e a
+heterogeneidade pela soma de quadrado das observações alocadas em grupos
+distintos.
+
+O principal problema em análise de agrupamento é a escolha do número de
+grupos, $k$, a serem formados. @Tibshirani2001 propuseram a estatística
+Gap para estimação de $k$. Essa estatística é calculada usando as
+medidas de homogeneidade do agrupamento em contraste com medidas de
+variáveis simuladas, em geral, por uma distribuição uniforme. A escolha
+do número de grupos é então realizada comparando as estatística Gap para
+um $k$. Para maiores informações sobre o algoritmo consulte
+@Tibshirani2001 e @clusterSim2016.
+
+## Recursos computacionais ##
+
+As análises presentes nesse artigo são todas realizadas no _software_ R
+(versão `r with(R.version, paste0(major, ".", minor))`) e estão
+disponíveis no sitío eletrônico do autor
+<https://jreduardo.github.io/lce5859-mem/>.
+
+# Resultados e discussão #
+
+Após extração dos dados (\autoref{conjunto-de-dados}) realizou-se a
+higienização dos textos que consistiu na remoção das palavras de parada
+(preposições, artigos, conjunções, etc.), da pontuação, dos espaços em
+branco e dos números. Além da remoção desses caracteres, realizou-se a
+radicalização das palavras restantes utilizando o algoritmo de Poter
+[@porter2001]. Do processo de higienização descrito, restaram `r
+length(tm::Terms(dtm_texts))` palavras distintas em todos os textos.
+
+Na \autoref{fig:wordcloud} são apresentados os 5\% termos, provenientes
+da radicalização, mais frequentes em todos os textos. Note que os termos
+mais frequentes são realmente àqueles utilizadas no ambiente de
+Knowledge Discovery and Data Mining. Destaque para as palavras **model**
+e **data**, o que reflete a característica do evento em discutir estudos
+aplicados.
 
 ```{r wordcloud, out.width="0.7\\textwidth", fig.height=5, fig.width=12, fig.cap="Nuvem dos 5\\% termos mais frequentes nos textos extraídos dos resumos e títulos dos artigos apresentados no SIGKDD 2016."}
 
@@ -310,150 +436,15 @@ wordcloud(words = wnames,
 
 ```
 
-# Metodologia #
-
-Muito da análise de texto, não fundamentada em modelos estatísticos, é
-realizada via técnicas multivariadas. Para atender o objetivo proposto
-nesse trabalho faz-se uso de técnicas multivariadas de redução de
-dimensionalidade via componentes principais (_PCA_) e de análise de
-agrupamento via algoritmo de _k-means_. Nessa seção são apresentados os
-métodos aplicados ao conjunto de textos a fim agrupá-los de forma
-satisfatória.
-
-
-## Organização de textos para análise ##
-
-Uma importante e não trivial etapa no processo de análise de textos é a
-adequação dos textos para análise. Conforme descrito na
-\autoref{introducao} a abordagem via _bag of words_, transforma os
-textos em uma matrix $\mathbb{X}$, cujo linhas são os documentos e
-colunas são os termos e os valores representam as frequências dos termos
-nos documentos. Para obtenção dos termos faz-se a higienização dos
-textos que consiste na remoção das palavras de parada (preposições,
-artigos, conjunções, etc.), da pontuação, dos espaços em branco e dos
-números. Além da remoção desses caracteres, faz-se a radicalização das
-palavras, para que palavras de mesmo sentido sejam associadas ao mesmo
-termo, por exemplo as `clustering`, `cluster`, `clusterization`,
-`clustered` possuem todas o mesmo radical, `cluster`, portanto ficam
-associadas ao termo `cluster`. Existem vários algoritmos para
-radicalização, nesse trabalho utilizou-se o algoritmo de Poter
-[@porter2001].
-
-## Redução de dimensionalidade via componentes principais ##
-
-Não raramente a matriz termo-documento de frequências é retangular
-possuindo um número de colunas (termos) muito maior que o número de
-linhas (documentos), além de ser razoavelmente esparsa. Assim é de
-interesse em análise de texto a redução do número de colunas da matrix
-termo-documento $\mathbb{X}$. Uma técnica multivariada cujo um dos
-objetivos é a redução de dimensionalidade é chamada de análise de
-componentes principais, que consiste construção de novas variáveis
-denominadas componentes principais a partir da decomposição da matriz de
-covariância ou correlação de $\mathbb{X}$ [@Friedman2001].
-
-Seja $\mathbf{R}$ a matriz de correlações de $\mathbb{X}$, de dimensão
-$p\times p$. $\mathbf{R}$ pode ser escrita como $\mathbf{R} = \mathbf{E}
-\Lambda \mathbf{E}^t$, em que $\Lambda$ é a matriz diagonal dos
-autovalores $\lambda_i$, $i=1,\ldots ,p$ da matriz $\mathbb{X}$, ou
-seja, $\Lambda=\text{diag}(\underline{\lambda})$; e $\mathbf{E}$ é a
-matriz dos autovetores $\underline{e}_i$, $i=1,\ldots ,p$. Assim as
-novas variáveis, denominadas componentes principais são dadas por
-$\underline{z}_i=\mathbb{X}\underline{e}_i$, para $i=1, \ldots, p$.
-
-Note que são tomadas calculadas tantas componentes quanto for o número
-de variáveis, porém apenas um subconjunto dessas componentes já é
-suficiente para explicar boa parte da variação total dos dados originais
-$\mathbb{X}$. O percentual da variância explicada pela i-ésima
-componente é dada por $\lambda_i/\sum_{j=1}^p \lambda_j$.
-
-A redução de dimensionalidade ocorre por tomar a matriz de componentes
-principais $\mathbf{Z}$, com $m$ componentes, necessárias para
-explicar um percentual arbitrário da variação total, $m<<p$, ao invés da
-matriz $\mathbb{X}$. Embora @Manly2008 sugira que a análise de
-agrupamento realizada sobre componentes principais deva ser evitada, em
-problemas _"small n large p"_ essa é uma solução comumente utilizada.
-
-## Agrupamento K-means ##
-
-Métodos de agrupamento visam agrupar as observações de um conjunto de
-dados em grupos cujo as observação de um grupo sejam similares e as
-observações de grupos distintos sejam distintas. Existem métodos de
-agrupamentos hieráquicos e não-hierárquicos. Nos hierárquicos
-normalmente se define o número de grupos a partir de um dendrograma,
-essa escolha é geralmente subjetiva e priorizasse nesses casos a
-interpretação dos grupos formados. Para os não-hierárquicos o número de
-grupos deve ser informado previamente e então um algoritmo atribuirá as
-observação aos grupos.
-
-
-O método não-hierárquico mais comumente utilizado é o chamado método de
-k-means [@Hartigan1979]. Nesse trabalho utiliza-se método de agrupamento
-não-hierárquico supra-citado. O \autoref{alg:kmeans} descreve o
-procedimento para formação dos grupos via _k-means_. Note que os dados
-de entrada do algortimo é o número de grupos a serem formados e os
-dados.
-
-\begin{algorithm}[H]
-  \caption{Agrupamento não-hierárquico de k-means.}
-  \label{alg:kmeans}
-  \SetAlgoLined
-  \Entrada{\\
-    \hspace{0.5cm}$k:$ número de grupos a serem formados (escalar
-    inteiro);\\
-    \hspace{0.5cm}$\mathbf{X}:$ conjunto de dados (matriz $n\times
-    p$).\\
-  }
-  \Saida{\\
-    \hspace{0.5cm}$\underline{g}:$ a atribuição dos grupos a cada
-    observação (vetor de tamanho $n$);\\
-  }
-  \BlankLine
-  \BlankLine
-  \While{As atribuições dos grupos não for a mesma.}{\label{line:while}
-    \textbf{(a)} Para cada grupo $k$ calcule o seu centróide. O
-    centróide do $k$-ésimo grupo é dado pelo vetor média das $p$
-    variáveis calculado das observação pertencentes a esse grupo;\\
-    \textbf{(b)} Atribua cada observação ao grupo, cujo tem o centróide
-     mais próximo, a proximidade é dada distância euclidiana entre o
-     centróide e o vetor de variáveis da observação
-  }
-\end{algorithm}
-\vspace{0.5cm}
-
-Conforme visto no \autoref{alg:kmeans} o número de grupos deve ser
-informado a priori, para avaliação do agrupamento realizado pode-se
-verificar as medidas de homogeneidade dos grupos e heterogeneidade entre
-grupos. A homogeneidade é dada pelo inverso da soma de quadrados das
-observações alocadas em um mesmo grupos e a heterogeneidade pela soma de
-quadrado das observações alocadas em grupos distintos.
-
-O principal problema em cados de agrupamento é a escolha do número de
-grupos, $k$, a serem formados. @Tibshirani2001 propôs a estatística Gap
-para esttimação de $k$. Essa estatística é calculada usando as medidas
-de homogeneidade do agrupamento em contraste com medidas de variáveis
-simuladas, em geral, por uma distribuição uniforme. A escolha do número
-de grupos é então realizada comparando as estatística Gap para um $k$.
-
-## Recursos computacionais ##
-
-As análises presentes nesse artigo são todas realizadas no _software_ R
-(versão `r with(R.version, paste0(major, ".", minor))`) e estão
-disponíveis no sitío eletrônico do autor
-<https://jreduardo.github.io/lce5859-mem/>.
-
-# Resultados e discussão #
-
-Conforme visto na \autoref{conjunto-de-dados}, o conjunto de dados
-utiizado nesse trabalho referem-se a textos que foram analisados sob a
-abordagem _bag of words_ onde os termos, provenientes da radicalização
-palavras, e os documentos, nesse caso os artigos, formam uma matriz
-denominada matriz termo-documento ($\mathbb{X}$). Nessa matriz as linhas
-são os artigos e as colunas os termos, os valores representam a
-frequência do termo no artigo. O gráfico à esquerda na
-\autoref{fig:pca-plot} ilustra essa matriz, apenas com os 30 termos mais
-frequentes. Note que há muitos valores iguais ou próximos a zero, mesmo
-dentrre os 30 termos mais frequentes, isso ocorre pois há muitos termos
-específicos dentro da área de Knowledge Discovery e Data Mining.
+Os termos, provenientes da radicalização palavras, e os documentos,
+nesse caso os artigos, formam uma matriz denominada matriz
+termo-documento ($\mathbb{X}$). Nessa matriz as linhas são os artigos e
+as colunas os termos, os valores representam a frequência do termo no
+artigo. O gráfico à esquerda na \autoref{fig:pca-plot} ilustra essa
+matriz, apenas com os 30 termos mais frequentes. Note que há muitos
+valores iguais ou próximos a zero, mesmo dentre os 30 termos mais
+frequentes, isso ocorre pois há muitos termos específicos dentro da área
+de Knowledge Discovery e Data Mining.
 
 ```{r pca, cache=TRUE}
 
@@ -480,7 +471,7 @@ A dimensão da matriz $\mathbb{X}$ é `r nrow(mat_texts)` $\times$
 `r ncol(mat_texts)`. Como o número de colunas é muito maior que o número
 de linhas, qualquer análise de agrupamentos (que utilize distâncias)
 ficará prejudicada devido a chamada "maldição da dimensionalidade"
-[@Friedman2001]. Assim procedeu-se com a construçã de componentes
+[@Friedman2001]. Assim procedeu-se com a construção de componentes
 principais para redução de dimensionalidade. No gráfico à direita da
 \autoref{fig:pca-plot} é apresentada a evolução do percentual da
 variância explicada pelo número de componentes principais. Note que com
@@ -608,19 +599,21 @@ Com as `r ni` componentes realizou-se o agrupamento não hierárquico
 _k-means_, conforme algoritmo proposto por @Hartigan1979. Como
 agrupamentos não hierárquicos necessitam que o número de grupos a serem
 formados seja conhecido, os artigos foram agrupados em $2, 3, \ldots,
-15$ grupos. Os resultados dos agrupamentos é apresentado na
+15$ grupos. Os resultados dos agrupamentos são apresentados na
 \autoref{fig:sqs-gap}. No gráfico à esquerda são exibidas as somas de
 quadrados $\sum_{i=j} (x_i - x_j)^2$ das observações alocadas em um
-mesmo grupo, $SQ$ intra-cluster (em preto) e a soma de quadrados das
-observações alocadas em um grupos diferentes, $SQ$ entre-cluster (am
+mesmo grupo ($SQ$ intra-cluster, em preto), e a soma de quadrados das
+observações alocadas em um grupos diferentes ($SQ$ entre-cluster, em
 azul). Para um bom agrupamento espera-se que a distância intra-cluster
-seja baixae a distância entre-cluster alta, porém essas são medidas
+seja baixa e a distância entre-cluster alta, porém essas são medidas
 inversamente proporcionais e assim desejamos um bom compromisso entre as
 duas medidas para a escolha do número de grupos. Embora as escalas sejam
 distintas (valores dos eixos $y$), por esse gráfico, o número de grupos
-adequado está em torno de 7 ou 8. Calculando os indíces de Gap
-[@Tibshirani2001] o número de grupos indicado é `r kchoosen`, o que está
-concordante com o gráfico de distâncias intra e entre-clusters.
+adequado está em torno de 7 ou 8. Calculando os estatísticas Gap
+[@Tibshirani2001] o número de grupos indicado é `r kchoosen`, o menor
+$k$ em que a condição $Gap(k) - Gap(k+1) + s_{k+1} > 0$ (gráfico à
+direita da \autoref{fig:sqs-gap}), o que está concordante com o gráfico
+de distâncias intra e entre-clusters.
 
 ```{r}
 
@@ -644,6 +637,12 @@ split_results <- lapply(levels(data_agrup$group), function(g) {
 narticles <- sapply(split_results, function(x) x$narticles)
 
 ```
+
+Note que o número de grupos estimado pelas estatísticas Gap, assim como
+visto nas medidas de homogeneidade dos grupos e heterogeneidade entre
+grupos, mostram que os `r length(levels(data_long$topic))` tópicos
+criados pelos organizadores do evento são muito mais do que o necessário
+para agrupar artigos similares.
 
 Os `r kchoosen` grupos formados pelo algoritmo k-means contém
 `r narticles` elementos (respectivamente). Para permitir a intepretação
@@ -787,6 +786,8 @@ probabilística para definição dos temas, @Blei2012 apresenta alguns
 modelos de probabísticos de tópicos que podem auxiliar na formação dos
 temas, em especial o modelo de alocação latente de Dirichlet parece
 satisfazer o objetivo formulado nesse artigo.
+
+\pagebreak
 
 # Referências # {-}
 
