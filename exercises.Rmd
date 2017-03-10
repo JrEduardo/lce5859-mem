@@ -8,6 +8,8 @@ date: '\today'
 logo: "configs/logo-esalq.png"
 bibliography: lce5859-mem.bib
 csl: configs/abntcite.csl
+header-includes:
+  - \usepackage[hmargin={1.7cm, 1.7cm}, vmargin={1.7cm, 1.7cm}]{geometry}
 output:
   pdf_document:
     template: configs/template.tex

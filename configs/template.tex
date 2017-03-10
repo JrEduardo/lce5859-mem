@@ -14,7 +14,6 @@
 \usepackage{eulervm}
 \usepackage{palatino}
 \usepackage{inconsolata}
-\usepackage[hmargin={1.7cm, 1.7cm}, vmargin={1.7cm, 1.7cm}]{geometry}
 \usepackage{amsmath, amsfonts, mathrsfs, amssymb, amsthm}
 \usepackage{indentfirst, graphicx, calc, setspace, icomma}
 \usepackage[table, usenames, svgnames]{xcolor}
@@ -24,6 +23,10 @@
 \usepackage{longtable,booktabs}
 \usepackage{realboxes}
 \usepackage[bottom]{footmisc}
+
+$for(header-includes)$
+$header-includes$
+$endfor$
 
 %-----------------------------------------------------------------------
 % Links
