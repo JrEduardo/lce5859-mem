@@ -79,6 +79,7 @@ options(
 library(magrittr)
 library(SnowballC)
 library(tm)
+library(clusterSim)
 
 ## For graphics
 library(wordcloud)
@@ -109,7 +110,7 @@ text2dtm <- function(text) {
 
 # Introdução #
 
-# Material e Métodos #
+# Conjunto de dados #
 
 ```{r}
 
@@ -138,21 +139,16 @@ dtm_texts <- text2dtm(data_texts)
 
 ```
 
-Os dados utilizados na análise correspondem aos textos dos títulos,
-resumos e palavras-chave dos artigos publicados no SIGKDD 2016, além dos
-tópicos atribuídos aos artigos pelos organizadores do evento. Na
-\autoref{fig:webscrap} exibe-se as páginas _web_ que
-
 O conjunto de dados analisados referem-se aos artigos apresentados na
 22nd SIGKDD Conference realizada entre os dias 13 e 17 de agosto de 2016
 sob organização da Association for Computing Machinery (ACM). As
 informações sobre os artigos aceitos no SIGKDD estão disponíveis no
-sítio eletrônico \url{http://www.kdd.org/kdd2016/}. A
-\autoref{fig:webscrap} ilustra a disposição das informações no sítio
-eletrônico do evento. Os dados utilizados na análise correspondem aos
-textos dos títulos e resumos dos artigos (destacados em vermelho na
-figura), além dos tópicos atribuídos aos artigos pelos organizadores do
-evento (destacados em azul).
+sítio eletrônico <http://www.kdd.org/kdd2016>. A \autoref{fig:webscrap}
+ilustra a disposição das informações no sítio eletrônico do evento. Os
+dados utilizados na análise correspondem aos textos dos títulos e
+resumos dos artigos (destacados em vermelho na figura), além dos tópicos
+atribuídos aos artigos pelos organizadores do evento (destacados em
+azul).
 
 ```{r webscrap, out.width="0.8\\textwidth", results="asis", fig.cap="Sítio do SIGKDD2016 de onde foram extraídos os títulos, resumos e tópicos."}
 
@@ -250,6 +246,299 @@ wordcloud(words = wnames,
           family = "serif")
 
 ```
+
+# Metodologia #
+
+# Resultados e discussão #
+
+Conforme visto na \autoref{conjunto-de-dados}, o conjunto de dados
+utiizado nesse trabalho referem-se a textos que foram analisados sob a
+abordagem _bag of words_ onde os termos, provenientes da radicalização
+palavras, e os documentos, nesse caso os artigos, formam uma matriz
+denominada matriz termo-documento ($\mathbb{X}$). Nessa matriz as linhas
+são os artigos e as colunas os termos, os valores representam a
+frequência do termo no artigo. O gráfico à esquerda na
+\autoref{fig:pca-plot} ilustra essa matriz, apenas com os 30 termos mais
+frequentes. Note que há muitos valores iguais ou próximos a zero, mesmo
+dentrre os 30 termos mais frequentes, isso ocorre pois há muitos termos
+específicos dentro da área de Knowledge Discovery e Data Mining.
+
+```{r pca, cache=TRUE}
+
+##----------------------------------------------------------------------
+## Analysis
+
+##-------------------------------------------
+## Dimensionality reduction
+
+## PCA decomposition
+Vcor <- cov(mat_texts)
+deco <- eigen(Vcor, symmetric = TRUE)
+li <- deco$values
+ei <- deco$vectors
+pvar <- li/sum(li)
+
+## Define the number of principal components
+ni <- sum(cumsum(pvar) < 0.999)
+scores <- mat_texts %*% ei[, 1:ni]
+
+```
+
+A dimensão da matriz $\mathbb{X}$ é `r nrow(mat_texts)` $\times$ `r
+ncol(mat_texts)`. Como o número de colunas é muito maior que o número de
+linhas, qualquer análise de agrupamentos (que utilize distâncias) ficará
+prejudicada devido a chamada "maldição da dimensionalidade"
+[@Friedman2001]. Assim procedeu-se com a construçã de componentes
+principais para redução de dimensionalidade. No gráfico à direita da
+\autoref{fig:pca-plot} é apresentada a evolução do percentual da
+variância explicada pelo número de componentes principais. Note que com
+`r ni` componentes já explica-se quase 100\% da varição total. Portanto,
+foram tomadas `r ni` componentes, uma redução de `r ncol(mat_texts)-ni`
+dimensões colunas da matriz $\mathbb{X}$.
+
+```{r pca-plot, fig.height=4.5, fig.width=11, fig.cap="Representação da matriz termo-documento de frequências com os 50 termos mais frequentes (à esquerda) e proporção acumulada da variância explicada pelo número de componentes considerados (à direita)"}
+
+## Visualizing data matrix
+aux <- mat_texts[, order(counts, decreasing = TRUE)[1:30]]
+xy1 <- levelplot(aux,
+                 aspect = "fill",
+                 col.regions = colorRampPalette(
+                     c("gray90",  "gray50", "gray20"))(100),
+                 ylab = "Termos",
+                 xlab = "Artigos",
+                 colorkey = list(space = "top"),
+                 scales = list(
+                     x = list(rot = 90, cex = 0.7, labels = NULL)),
+                 par.settings = list(
+                     layout.heights = list(
+                         axis.xlab.padding = -2,
+                         key.axis.padding = -1))
+                 )
+
+txt <- parse(text = paste0("lambda[", ni, "]==", li[ni]))
+xy2 <- xyplot(cumsum(pvar)[1:250] ~ seq(pvar)[1:250],
+              pch = 19, type = c("g", "l", "p"),
+              xlab = "Nº de componentes",
+              ylab = "% variância explicada",
+              scales = list(y = list(rot = 90)),
+              par.settings = list(
+                  layout.widths = list(ylab.axis.padding = 0)),
+              panel = function(x, y, ...) {
+                  panel.xyplot(x, y, ...)
+                  panel.abline(h = 0.99, v = ni, lty = 2)
+                  panel.points(x[ni], y[ni], col = cols[2], pch = 19)
+                  panel.text(x[ni] - 5, y[ni] - 0.06,
+                             txt, cex = 0.9, pos = 4)
+              })
+
+print(xy1, position = c(0, 0, 0.62, 1), more = TRUE)
+print(xy2, position = c(0.6, 0, 1, 1), more = FALSE)
+
+```
+
+```{r kmeans-gap, cache=TRUE}
+
+##-------------------------------------------
+## K-means clustering (choosen number of groups)
+
+## Find groups
+ks <- structure(2:15, names = paste0("k", 2:15))
+lkms <- lapply(ks, function(k) {
+    kmeans(x = scores, centers = k,
+           iter.max = 50, nstart = 10)
+})
+meds <- sapply(lkms, function(x) {
+    c("intra" = x$tot.withinss, "entre" = x$betweens)
+})
+meds <- cbind(t(meds), k = ks)
+
+## Compute gap statistic
+len <- length(lkms) - 1
+mat <- matrix(nrow = len, ncol = 2)
+for (u in 1:len) {
+    cls <- cbind(lkms[[u]]$cluster, lkms[[u + 1]]$cluster)
+    gap <- index.Gap(mat_texts, cls, B = 12, method = "k-means")
+    mat[u, ] = do.call("c", gap)
+}
+colnames(mat) <- names(gap)
+gaps <- cbind(k = 1:len + 1, mat)
+
+```
+
+```{r sqs-gap, fica.height=5, fig.width=11, fig.cap="Medidas de qualidade de agrupamento. Soma das distâncias euclidianas intra e entre clusters (esquerda) e diferenças de indíces Gap (direita)."}
+
+## Illustrate statistics for choose the number of groups
+xy1a <- xyplot(intra/1000 ~ k, pch = 19,
+               type = "o", cex = 0.7,
+               data = as.data.frame(meds),
+               ylab = "SQ intra-clusters (em milhares)",
+               scales = list(x = list(at = ks)))
+xy1b <- xyplot(entre/1000 ~ k, pch = 19,
+               type = "o", cex = 0.7,
+               data = as.data.frame(meds),
+               ylab = "SQ entre-clusters (em milhares)",
+               scales = list(x = list(at = ks)))
+xy1 <- doubleYScale(
+    xy1a, xy1b, add.ylab2 = TRUE,
+    text = c("Dentro dos clusters", "Entre os clusters"),
+    title = "Soma de quadrados (SQ) das observações",
+    cex.title = 1.1,
+    points = TRUE,
+    column = 2) +
+    layer(panel.abline(v = ks, col = "gray80", lty = 2))
+lab <- expression("Gap"*(k)-"Gap"*(k+1) +~s[k+1])
+xy2 <- xyplot(diffu ~ k,
+              data = as.data.frame(gaps),
+              ylab = lab,
+              type = c("p"),
+              pch = 19,
+              scales = list(y = list(rot = 90),
+                            x = list(at = ks)),
+              panel = function(x, y, subscripts, ... ) {
+                  cols <- rep("gray60", length(y))
+                  cols[y > 0] <- 1
+                  panel.abline(v = ks, col = "gray80", lty = 2)
+                  panel.xyplot(x, y, col = cols, ...)
+                  panel.abline(h = 0, lty = 2, col = 1)
+              })
+
+print(xy1, position = c(0.0, 0.0, 0.52, 1.0), more = TRUE)
+print(xy2, position = c(0.55, 0.0, 1.0, 0.93), more = FALSE)
+
+## Choose k according to Tibishirani 2001
+kchoosen <- with(as.data.frame(gaps), {
+    min(k[diffu > 0])
+})
+
+```
+
+
+Com as `r ni` componentes realizou-se o agrupamento não hierárquico
+_k-means_, conforme algoritmo proposto por @Hartigan1979. Como
+agrupamentos não hierárquicos necessitam que o número de grupos a serem
+formados seja conhecido, os artigos foram agrupados em $2, 3, \ldots,
+15$ grupos. Os resultados dos agrupamentos é apresentado na
+\autoref{fig:sqs-gap}. No gráfico à esquerda são exibidas as somas de
+quadrados $\sum_{i=j} (x_i - x_j)^2$ das observações alocadas em um
+mesmo grupo, $SQ$ intra-cluster (em preto) e a soma de quadrados das
+observações alocadas em um grupos diferentes, $SQ$ entre-cluster (am
+azul). Para um bom agrupamento espera-se que a distância intra-cluster
+seja baixae a distância entre-cluster alta, porém essas são medidas
+inversamente proporcionais e assim desejamos um bom compromisso entre as
+duas medidas para a escolha do número de grupos. Embora as escalas sejam
+distintas (valores dos eixos $y$), por esse gráfico, o número de grupos
+adequado está em torno de 7 ou 8. Calculando os indíces de Gap
+[@Tibshirani2001] o número de grupos indicado é `r kchoosen`, o que está
+concordante com o gráfico de distâncias intra e entre-clusters.
+
+```{r}
+
+##-------------------------------------------
+## Verify groups
+agrup <- lkms[[kchoosen-1]]
+data_agrup <- cbind(data_short, "group" = factor(agrup$cluster))
+
+split_results <- lapply(levels(data_agrup$group), function(g) {
+    da <- subset(data_agrup, group == g)
+    data_texts <- with(da, paste(title, abstract))
+    dtm_texts <- text2dtm(data_texts)
+    mat_texts <- as.matrix(dtm_texts)
+    counts <- colSums(mat_texts)
+    list("narticles" = nrow(da),
+         "dtm_texts" = dtm_texts,
+         "mat_texts" = mat_texts,
+         "counts" = counts)
+})
+
+narticles <- sapply(split_results, function(x) x$narticles)
+
+```
+
+Os `r kchoosen` grupos formados pelo algoritmo k-means contém
+`r narticles` elementos (respectivamente). Para permitir a intepretação
+dos grupos, exibi-se na \autoref{fig:wordcloud-groups} os 5\% termos
+mais frequentes em cada grupo. Note que o Grupo `r which.max(narticles)`
+é formado por um número de artigos muito maior que os demais, o que
+indica o que consequentemente acarreta em um número maior de termos e
+maior heterogeneidade do grupo. Isso fica claro ao observar a gama de
+termos apresentadas para esse grupo na
+\autoref{fig:wordcloud-groups}. A partir dessa figura também pode-se
+caracterizar os grupos:
+
+* **Grupo 1:** artigos essencialmente sobre agrupamentos;
+* **Grupo 2:** artigos essencialmente sobre propostas de modelagem de
+  dados;
+* **Grupo 3:** artigos diversos sobre análise de dados para Knowledge
+  Discovery e Data Mining;
+* **Grupo 4:** artigos essencialmente sobre reconhecimento de padrão e
+  e análise de grafos;
+* **Grupo 5:** artigos relacionados a métodos de aprendizado de
+  máquina^[o termo _feature_ em machine learning é geralmente usado
+  como sinônimo para variáveis preditoras.]; e
+* **Grupo 6:** artigos essencialmente sobre redes neurais.
+
+```{r wordcloud-groups, fig.height=6, fig.width=12, fig.cap="Nuvem com os 5\\% termos mais frequentes em cada grupo formado pelo algoritmo k-means."}
+
+## Wordclouds
+par(mfrow = c(2, 3), mar = c(0, 0, 0, 0))
+sapply(seq(unique(agrup$cluster)), function(i) {
+    main <- paste0("Grupo ", i, " (", split_results[[i]]$narticles,
+                   " artigos)")
+    counts <- split_results[[i]]$counts
+    paleta <- brewer.pal(9, "Greys")[-(1:4)]
+    corte <- quantile(counts, probs = 0.95)
+    wnames <- names(counts)[counts > corte] %>%
+        stringi::stri_trans_general(id = "latin-ascii")
+    cnames <- counts[counts > corte]
+    wordcloud(words = wnames,
+              freq = cnames,
+              min.freq = 1,
+              random.order = FALSE,
+              colors = paleta,
+              family = "serif")
+    mtext(main, line = -1.5)
+    box()
+})
+
+```
+
+```{r}
+
+## Random select 2 articles for each group
+set.seed(1994)
+index <- lapply(levels(data_agrup$group), function(i) {
+    sample(which(data_agrup$group == i), 2)
+})
+random_da <- data_agrup[unlist(index), c("group", "title")]
+
+```
+
+
+Como resultado complementar, são apresentados na \autoref{tab:amostra}
+os títulos de dois artigos escolhidos aleatoriamente de cada um dos
+grupos formados. Pode se obsrevar que os títulos apresentados condizem
+com a representação dos grupos realizada na
+\autoref{fig:wordcloud-groups}. Porém vale ressaltar que o título
+somente uma pequena parte do conjunto de textos que caracterizam o
+artigo, a maior parte da informação provém do resumo.
+
+\begin{longtable}[c]{>{\arraybackslash}p{0.8cm}p{0.8cm}p{15cm}}
+\caption{Amostras aleatórias de dois artigos em cada grupo}
+\label{tab:amostra}\\[-0.3cm]
+  \toprule
+  Índice & Grupo & Título do artigo  \\
+  \hline
+```{r, results="asis"}
+print(xtable(random_da),
+      include.colnames = FALSE,
+      hline.after = NULL,
+      only.contents = TRUE)
+
+```
+  \bottomrule
+\end{longtable}
+
+
 
 # Referências #
 
