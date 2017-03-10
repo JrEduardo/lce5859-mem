@@ -8,6 +8,8 @@ date: '\today'
 logo: "configs/logo-esalq.png"
 bibliography: lce5859-mem.bib
 csl: configs/abntcite.csl
+header-includes:
+  - \usepackage[hmargin={2.5cm, 2.5cm}, vmargin={3cm, 3cm}]{geometry}
 output:
   bookdown::pdf_document2:
     template: configs/template.tex
@@ -109,6 +111,63 @@ text2dtm <- function(text) {
 \pagebreak
 
 # Introdução #
+
+Atualmente se produz muito conhecimento que, com o avanço da computação
+e poder de armazenagem, estão mantidos em diversos mídias (servidores,
+unidades de disco, pendrives, etc.) ao redor do mundo. Esse conhecimento
+é transcrito em diferentes produtos como artigos científicos, páginas
+web, blogs, vídeos entre outros. Todavia, quanto maior a quantidade de
+conteúdo maior a dificuldade de organização deste.
+
+Para organização desses produtos há diversos esforços voltados à análise
+de texto, uma vez que das mídias citadas as mais comuns são expressas em
+forma de texto (como artigos, posts, livros, etc.). Dificuldades para
+análise ou mineração de textos são frequentes e estão presentes desde a
+coleta dos dados até a escolha da técnica adequada para análise e
+interpretação dos resultados.
+
+Na mineração de dados textuais pode-se listar duas estratégias
+principais i) _Bag of words_ em que a semântica do texto é desfeita e a
+estrutura linguística ignorada, os textos são representados pela
+frequência ou ocorrência das palavras; e ii) _Natural Precessing
+Language (NLP)_ em que as palavras são caracterizadas pelo seu sentido
+morfológico e os textos são analisados considerando elementos da
+linguagem [@Berry2010]. A estratégia via _bag o words_, embora simples,
+é extremamente útil e mais comum. Os principais objetivos sob essa
+estratégia são agrupamento, classificação e predição de textos
+[@Silge2017] embora outros possam existir.
+
+Uma aplicação direta da análise de texto pode ser pensada para a
+comunidade acadêmica. Comumente eventos da comunidade científica reúnem
+pesquisadores para exposição e discussão de seus recentes
+trabalhos. Esses trabalhos são submetidos ao evento e, em geral, são
+classificados por temas, o que facilita i) os participantes a
+localizarem seus interesses e ii) consultas ao acervo após finalização
+do evento. Todavia, há pouco rigor na atribuição desses temas e muitas
+vezes, pela má atribuição, esses acabam sendo dispensáveis. Assim a o
+agrupamento de textos para geração de temas com trabalhos homogêneos tem
+extrema relevância para científicos de eventos.
+
+Nesse artigo apresentamos uma nálise textual dos resumos dos artigos
+apresentados na _22nd SIGKDD Conference_, maior evento de maior evento
+de Knowledge Discovery and Data Mining promovido pela Association for
+Computing Machinery (ACM), com o objetivo de agrupar os artigos pela
+similaridade de seus textos. Isso é realizado via abordagem _bag of
+words_ utilizando técnicas multivariadas para redução de
+dimensionalidade e agrupameento. Após agrupamento os grupos são
+interpretados como temas e contrastados com os temas criados pela
+organização do evento.
+
+O artigo é organizado em cinco seções. Essa primeira seção enfatiza a
+importância da análise de textos e sua relevância em envetos
+científicos. Na \autoref{conjunto-de-dados} o conjunto de textos é
+descrito assim como destacado o procedimento de _web scrapping_ para sua
+obtenção. Na \autoref{metodologia} são descritos os métodos utilizados
+na análise dos dados e na \autoref{resultados-e-discussao} apresentados
+os resultados da aplicação dos métodos bem como algumas discussões. Por
+fim a \autoref{conclusoes} é destinada às considerações finais obtidas
+desse trabalho e à apresentação de possíveis direções para pesquisas
+futuras.
 
 # Conjunto de dados #
 
@@ -412,7 +471,6 @@ kchoosen <- with(as.data.frame(gaps), {
 
 ```
 
-
 Com as `r ni` componentes realizou-se o agrupamento não hierárquico
 _k-means_, conforme algoritmo proposto por @Hartigan1979. Como
 agrupamentos não hierárquicos necessitam que o número de grupos a serem
@@ -513,7 +571,6 @@ random_da <- data_agrup[unlist(index), c("group", "title")]
 
 ```
 
-
 Como resultado complementar, são apresentados na \autoref{tab:amostra}
 os títulos de dois artigos escolhidos aleatoriamente de cada um dos
 grupos formados. Pode se obsrevar que os títulos apresentados condizem
@@ -538,7 +595,7 @@ print(xtable(random_da),
   \bottomrule
 \end{longtable}
 
-
+# Conclusões #
 
 # Referências #
 
