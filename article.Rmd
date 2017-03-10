@@ -10,6 +10,10 @@ bibliography: lce5859-mem.bib
 csl: configs/abntcite.csl
 header-includes:
   - \usepackage[hmargin={2.5cm, 2.5cm}, vmargin={3cm, 3cm}]{geometry}
+  - \usepackage[portuguese, linesnumbered, vlined, ruled, commentsnumbered]{algorithm2e}
+  - \SetAlCapSty{}
+  - \SetAlCapFnt{\normalsize}
+  - \SetAlCapNameFnt{\small}
 output:
   bookdown::pdf_document2:
     template: configs/template.tex
@@ -308,6 +312,135 @@ wordcloud(words = wnames,
 
 # Metodologia #
 
+Muito da análise de texto, não fundamentada em modelos estatísticos, é
+realizada via técnicas multivariadas. Para atender o objetivo proposto
+nesse trabalho faz-se uso de técnicas multivariadas de redução de
+dimensionalidade via componentes principais (_PCA_) e de análise de
+agrupamento via algoritmo de _k-means_. Nessa seção são apresentados os
+métodos aplicados ao conjunto de textos a fim agrupá-los de forma
+satisfatória.
+
+
+## Organização de textos para análise ##
+
+Uma importante e não trivial etapa no processo de análise de textos é a
+adequação dos textos para análise. Conforme descrito na
+\autoref{introducao} a abordagem via _bag of words_, transforma os
+textos em uma matrix $\mathbb{X}$, cujo linhas são os documentos e
+colunas são os termos e os valores representam as frequências dos termos
+nos documentos. Para obtenção dos termos faz-se a higienização dos
+textos que consiste na remoção das palavras de parada (preposições,
+artigos, conjunções, etc.), da pontuação, dos espaços em branco e dos
+números. Além da remoção desses caracteres, faz-se a radicalização das
+palavras, para que palavras de mesmo sentido sejam associadas ao mesmo
+termo, por exemplo as `clustering`, `cluster`, `clusterization`,
+`clustered` possuem todas o mesmo radical, `cluster`, portanto ficam
+associadas ao termo `cluster`. Existem vários algoritmos para
+radicalização, nesse trabalho utilizou-se o algoritmo de Poter
+[@porter2001].
+
+## Redução de dimensionalidade via componentes principais ##
+
+Não raramente a matriz termo-documento de frequências é retangular
+possuindo um número de colunas (termos) muito maior que o número de
+linhas (documentos), além de ser razoavelmente esparsa. Assim é de
+interesse em análise de texto a redução do número de colunas da matrix
+termo-documento $\mathbb{X}$. Uma técnica multivariada cujo um dos
+objetivos é a redução de dimensionalidade é chamada de análise de
+componentes principais, que consiste construção de novas variáveis
+denominadas componentes principais a partir da decomposição da matriz de
+covariância ou correlação de $\mathbb{X}$ [@Friedman2001].
+
+Seja $\mathbf{R}$ a matriz de correlações de $\mathbb{X}$, de dimensão
+$p\times p$. $\mathbf{R}$ pode ser escrita como $\mathbf{R} = \mathbf{E}
+\Lambda \mathbf{E}^t$, em que $\Lambda$ é a matriz diagonal dos
+autovalores $\lambda_i$, $i=1,\ldots ,p$ da matriz $\mathbb{X}$, ou
+seja, $\Lambda=\text{diag}(\underline{\lambda})$; e $\mathbf{E}$ é a
+matriz dos autovetores $\underline{e}_i$, $i=1,\ldots ,p$. Assim as
+novas variáveis, denominadas componentes principais são dadas por
+$\underline{z}_i=\mathbb{X}\underline{e}_i$, para $i=1, \ldots, p$.
+
+Note que são tomadas calculadas tantas componentes quanto for o número
+de variáveis, porém apenas um subconjunto dessas componentes já é
+suficiente para explicar boa parte da variação total dos dados originais
+$\mathbb{X}$. O percentual da variância explicada pela i-ésima
+componente é dada por $\lambda_i/\sum_{j=1}^p \lambda_j$.
+
+A redução de dimensionalidade ocorre por tomar a matriz de componentes
+principais $\mathbf{Z}$, com $m$ componentes, necessárias para
+explicar um percentual arbitrário da variação total, $m<<p$, ao invés da
+matriz $\mathbb{X}$. Embora @Manly2008 sugira que a análise de
+agrupamento realizada sobre componentes principais deva ser evitada, em
+problemas _"small n large p"_ essa é uma solução comumente utilizada.
+
+## Agrupamento K-means ##
+
+Métodos de agrupamento visam agrupar as observações de um conjunto de
+dados em grupos cujo as observação de um grupo sejam similares e as
+observações de grupos distintos sejam distintas. Existem métodos de
+agrupamentos hieráquicos e não-hierárquicos. Nos hierárquicos
+normalmente se define o número de grupos a partir de um dendrograma,
+essa escolha é geralmente subjetiva e priorizasse nesses casos a
+interpretação dos grupos formados. Para os não-hierárquicos o número de
+grupos deve ser informado previamente e então um algoritmo atribuirá as
+observação aos grupos.
+
+
+O método não-hierárquico mais comumente utilizado é o chamado método de
+k-means [@Hartigan1979]. Nesse trabalho utiliza-se método de agrupamento
+não-hierárquico supra-citado. O \autoref{alg:kmeans} descreve o
+procedimento para formação dos grupos via _k-means_. Note que os dados
+de entrada do algortimo é o número de grupos a serem formados e os
+dados.
+
+\begin{algorithm}[H]
+  \caption{Agrupamento não-hierárquico de k-means.}
+  \label{alg:kmeans}
+  \SetAlgoLined
+  \Entrada{\\
+    \hspace{0.5cm}$k:$ número de grupos a serem formados (escalar
+    inteiro);\\
+    \hspace{0.5cm}$\mathbf{X}:$ conjunto de dados (matriz $n\times
+    p$).\\
+  }
+  \Saida{\\
+    \hspace{0.5cm}$\underline{g}:$ a atribuição dos grupos a cada
+    observação (vetor de tamanho $n$);\\
+  }
+  \BlankLine
+  \BlankLine
+  \While{As atribuições dos grupos não for a mesma.}{\label{line:while}
+    \textbf{(a)} Para cada grupo $k$ calcule o seu centróide. O
+    centróide do $k$-ésimo grupo é dado pelo vetor média das $p$
+    variáveis calculado das observação pertencentes a esse grupo;\\
+    \textbf{(b)} Atribua cada observação ao grupo, cujo tem o centróide
+     mais próximo, a proximidade é dada distância euclidiana entre o
+     centróide e o vetor de variáveis da observação
+  }
+\end{algorithm}
+\vspace{0.5cm}
+
+Conforme visto no \autoref{alg:kmeans} o número de grupos deve ser
+informado a priori, para avaliação do agrupamento realizado pode-se
+verificar as medidas de homogeneidade dos grupos e heterogeneidade entre
+grupos. A homogeneidade é dada pelo inverso da soma de quadrados das
+observações alocadas em um mesmo grupos e a heterogeneidade pela soma de
+quadrado das observações alocadas em grupos distintos.
+
+O principal problema em cados de agrupamento é a escolha do número de
+grupos, $k$, a serem formados. @Tibshirani2001 propôs a estatística Gap
+para esttimação de $k$. Essa estatística é calculada usando as medidas
+de homogeneidade do agrupamento em contraste com medidas de variáveis
+simuladas, em geral, por uma distribuição uniforme. A escolha do número
+de grupos é então realizada comparando as estatística Gap para um $k$.
+
+## Recursos computacionais ##
+
+As análises presentes nesse artigo são todas realizadas no _software_ R
+(versão `r with(R.version, paste0(major, ".", minor))`) e estão
+disponíveis no sitío eletrônico do autor
+<https://jreduardo.github.io/lce5859-mem/>.
+
 # Resultados e discussão #
 
 Conforme visto na \autoref{conjunto-de-dados}, o conjunto de dados
@@ -343,10 +476,10 @@ scores <- mat_texts %*% ei[, 1:ni]
 
 ```
 
-A dimensão da matriz $\mathbb{X}$ é `r nrow(mat_texts)` $\times$ `r
-ncol(mat_texts)`. Como o número de colunas é muito maior que o número de
-linhas, qualquer análise de agrupamentos (que utilize distâncias) ficará
-prejudicada devido a chamada "maldição da dimensionalidade"
+A dimensão da matriz $\mathbb{X}$ é `r nrow(mat_texts)` $\times$
+`r ncol(mat_texts)`. Como o número de colunas é muito maior que o número
+de linhas, qualquer análise de agrupamentos (que utilize distâncias)
+ficará prejudicada devido a chamada "maldição da dimensionalidade"
 [@Friedman2001]. Assim procedeu-se com a construçã de componentes
 principais para redução de dimensionalidade. No gráfico à direita da
 \autoref{fig:pca-plot} é apresentada a evolução do percentual da
@@ -597,7 +730,9 @@ print(xtable(random_da),
 
 # Conclusões #
 
-# Referências #
+# Referências # {-}
 
 \setlength\parindent{0pt}
+\setlength{\parskip}{0.2cm}
+
 \small
