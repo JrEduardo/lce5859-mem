@@ -730,6 +730,64 @@ print(xtable(random_da),
 
 # Conclusões #
 
+```{r}
+
+## Dimensions
+npa <- nrow(data_long)
+nar <- nrow(data_short)
+nto <- length(levels(data_long$topic))
+nx <- nrow(mat_texts)
+px <- ncol(mat_texts)
+mx <- ncol(scores)
+
+```
+
+Nesse artigo foram apresentados os procedimentos para extração de dados
+textuais de páginas web, nomeadamente, os títulos e resumos dos artigos
+apresentados na _22nd SIGKDD Conference_. Foram `r npa` páginas
+consultadas e `r nar` artigos, cujo título e resumos foram
+extraídos. Após pré-processamento os `r nar` artigos forneceram `r nx`
+termos distintos. A coleção de `r nar` artigos, organizada em uma matriz
+termo-documento, de dimensão `r nx` $\times$ `r px` foi submetida a uma
+análise de componentes principais onde `r ni` componentes foram retidas
+para continuidade da análise, ou seja, a matriz termo-documento foi
+reduzido de `r px` colunas para `r ni`. Com a nova matriz em que para
+cada artigo foi associado valores de `r ni` componentes, realizou-se
+análises de agrupamento por _k-means_ para $k$'s de 2
+a 15. Verificou-se, pela estatística de Gap, que o número de grupos
+adequado a esses dados são `r kchoosen`, muito menor do que os `r nto`
+tópicos definidos pelo evento. A avaliação dos grupos mostrou
+que o argrupamento conseguiu juntar artigos com conteúdos similares
+podendo nomear esses grupos como
+\vspace{-0.2cm}
+
+* **Grupo 1:** artigos essencialmente sobre agrupamentos;
+* **Grupo 2:** artigos essencialmente sobre propostas de modelagem de
+  dados;
+* **Grupo 3:** artigos diversos sobre análise de dados para Knowledge
+  Discovery e Data Mining;
+* **Grupo 4:** artigos essencialmente sobre reconhecimento de padrão e
+  e análise de grafos;
+* **Grupo 5:** artigos relacionados a métodos de aprendizado de máquina;
+  e
+* **Grupo 6:** artigos essencialmente sobre redes neurais.
+
+Com base nos resultados obtidos fica evidente que uma abordagem
+estatística ou heurística, para a definição de temas para trabalhos
+apresentados em eventos científicos, leva a uma melhor organização dos
+trabalhos, do que a atribuição subjetiva realizada pelos
+organizadores. A aplicação da metodologia apresentada também não se
+restringe a trabalhos acadêmicos, agrupamento de _posts_ em blogs, de
+comentários em redes sociais, reclamações em central de atendimentos,
+entre outros são exemplos em que as análises discutidas no artigo podem
+ser replicadas com a devida adequação.
+
+Como pesquisas decorrentes desse trabalho sugere-se uma abordagem
+probabilística para definição dos temas, @Blei2012 apresenta alguns
+modelos de probabísticos de tópicos que podem auxiliar na formação dos
+temas, em especial o modelo de alocação latente de Dirichlet parece
+satisfazer o objetivo formulado nesse artigo.
+
 # Referências # {-}
 
 \setlength\parindent{0pt}
