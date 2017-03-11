@@ -23,17 +23,39 @@ output:
 \begin{center}
 \large Eduardo Elias Ribeiro Junior$^\ast$\footnote{Contato:
 <edujrrib@gmail.com>/<jreduardo.usp.br>}\\
-$^*$ Departamento de Ciências Exatas LCE ESALQ-USP / LEG-UFPR
+$^*$ Departamento de Ciências Exatas LCE ESALQ-USP
 \end{center}
 \vspace{0.5cm}
 
 \begin{abstract}
 
+Atualmente com o avanço no poder de armazenagem muitos conhecimento é
+produzido e mantido em diversas mídias (servidores, unidades de disco,
+pendrives, etc.). Na área acadêmica o produto relacionado à transmissão
+de conhecimento são artigos. Comumente, em eventos científicos, têm-se
+os artigos expostos que são agrupados em diferentes temas. Todavia esse
+agrupamento é em geral realizado por humanos e nem sempre são
+efetivos. Nesse artigo propõe-se uma metodologia para agrupamento de
+artigos científicos, com base nos textos contidos em seus títulos e
+resumos, baseados em técnicas estatísticas multivariadas. Os dados
+utilizados no trabalhos são referentes aos títulos e resumos de 203
+artigos apresentados na 22nd SIGKDD Conference e foram obtidos via
+ferramentas de webscrapping. Após higienização dos textos foram obtidos
+3173 termos distintos que foram organizados em uma matriz
+termo-documento de frequências. Utilizando componentes principais as
+3173 colunas da matriz termo-documento foram reduzidas a 199 componentes
+principais. Com as componentes principais estimou-se, via estatísticas
+Gap, que apenas 6 grupos seriam adequados para agrupamento, o que mostra
+que a atribuição à 16 temas distintos feita pela organização do evento é
+desnecessária. Os grupos puderam ser interpretados e a análise destes
+mostrou que o agrupamento foi satisfatório. Todo o trabalho foi
+elaborado com o auxílio do software R e os códigos estão disponíveis em
+um material suplementar online.
+
 \vspace{0.2cm}
 \noindent
-\textbf{Palavras-chave: }{\it Classificação, Análise Discriminante,
-Regressão Logística, Árvores de decisão, Random Forest, Bagging,
-Boosting, SVM}.
+\textbf{Palavras-chave: }{\it text-mining, web-scrapping,
+agrupamento, pca, k-means, estatísticas Gap}.
 
 \end{abstract}
 
@@ -122,7 +144,7 @@ Na mineração de dados textuais pode-se listar duas estratégias
 principais i) _Bag of words_ em que a semântica do texto é desfeita e a
 estrutura linguística ignorada, sob essa abordagem os textos são
 representados pela frequência ou ocorrência das palavras; e ii) _Natural
-Precessing Language (NLP)_ em que as palavras são caracterizadas pelo
+Processing Language (NLP)_ em que as palavras são caracterizadas pelo
 seu sentido morfológico e os textos são analisados considerando
 elementos da linguagem [@Berry2010]. A estratégia via _bag o words_,
 embora simples, é extremamente útil e mais comum. Os principais
@@ -140,18 +162,18 @@ vezes, pela má atribuição, esses acabam sendo dispensáveis. Assim a o
 agrupamento de textos para geração de temas com trabalhos homogêneos tem
 extrema relevância para científicos de eventos.
 
-Nesse artigo apresentamos uma nálise textual dos resumos dos artigos
+Nesse artigo apresentamos uma análise textual dos resumos dos artigos
 apresentados na _22nd SIGKDD Conference_, maior evento de maior evento
 de Knowledge Discovery and Data Mining promovido pela Association for
 Computing Machinery (ACM), com o objetivo de agrupar os artigos pela
 similaridade de seus textos. Isso é realizado via abordagem _bag of
 words_ utilizando técnicas multivariadas para redução de
-dimensionalidade e agrupameento. Após agrupamento os grupos são
+dimensionalidade e agrupamento. Após agrupamento os grupos são
 interpretados como temas e contrastados com os temas criados pela
 organização do evento.
 
 O artigo é organizado em cinco seções. Essa primeira seção enfatiza a
-importância da análise de textos e sua relevância em envetos
+importância da análise de textos e sua relevância em eventos
 científicos. Na \autoref{conjunto-de-dados} o conjunto de textos é
 descrito assim como destacado o procedimento de _web scrapping_ para sua
 obtenção. Na \autoref{metodologia} são descritos os métodos utilizados
@@ -236,9 +258,9 @@ Ao todo foram `r nrow(data_long)` páginas consultadas, referentes à
 `r nlevels(data_long$topic)` tópicos definidos pelos organizadores do
 SIGKDD e o número de artigos pertencentes a cada respectivo tópico. Note
 que nessa tabela a soma de artigos não representa o número de artigos
-únicos apresentados no evento, pois mais de um tópico pode ser atrubuído
+únicos apresentados no evento, pois mais de um tópico pode ser atribuído
 ao mesmo artigo (veja a \autoref{fig:webscrap}). Observe também que há
-uma moderada predominância de artigos cujo foram atrubuídos os três
+uma moderada predominância de artigos cujo foram atribuídos os três
 primeiros tópicos, ainda com apenas os 9 tópicos mais frequentes têm-se
 aproximadamente 86\% de todas as atribuições. Das atribuições de tópicos
 pelos organizadores foram `r freq_topics` artigos com 1, 2, 3, 4, 5 e 6
@@ -282,7 +304,7 @@ satisfatória.
 Uma importante e não trivial etapa no processo de análise de textos é a
 adequação dos textos para análise. Conforme descrito na
 \autoref{introducao} a abordagem via _bag of words_, transforma os
-textos em uma matrix $\mathbb{X}$, cujo linhas são os documentos,
+textos em uma matriz $\mathbb{X}$, cujo linhas são os documentos,
 colunas são os termos e os valores representam as frequências dos termos
 nos documentos. Para obtenção dos termos faz-se a higienização dos
 textos que consiste na remoção das palavras de parada (preposições,
@@ -335,7 +357,7 @@ problemas _"small n large p"_ essa é uma solução comumente utilizada.
 Métodos de agrupamento visam agrupar as observações de um conjunto de
 dados em grupos, cujo as observação de um grupo sejam similares e as
 observações de grupos distintos sejam distintas. Existem métodos de
-agrupamentos hieráquicos e não-hierárquicos. Nos hierárquicos
+agrupamentos hierárquicos e não-hierárquicos. Nos hierárquicos
 normalmente se define o número de grupos a partir de um dendrograma,
 essa escolha é geralmente subjetiva e priorizasse, nesses casos, a
 interpretação dos grupos formados. Para os não-hierárquicos o número de
@@ -348,7 +370,7 @@ k-means [@Hartigan1979]. Nesse trabalho utiliza-se método de agrupamento
 não-hierárquico supra-citado. O \autoref{alg:kmeans} descreve o
 procedimento para formação dos grupos via _k-means_. Note que nos dados
 de entrada do algoritmo o número de grupos a serem formados e os
-dados devem ser específicados.
+dados devem ser especificados.
 
 \begin{algorithm}[H]
   \caption{Agrupamento não-hierárquico de k-means.}
@@ -368,12 +390,12 @@ dados devem ser específicados.
   \BlankLine
   Atribua aleatoriamente as observações aos grupos;\\
   \While{As atribuições dos grupos não for a mesma.}{\label{line:while}
-    \textbf{(a)} Para cada grupo $k$ calcule o seu centróide. O
-    centróide do $k$-ésimo grupo é dado pelo vetor média das $p$
+    \textbf{(a)} Para cada grupo $k$ calcule o seu centroide. O
+    centroide do $k$-ésimo grupo é dado pelo vetor média das $p$
     variáveis calculado das observação pertencentes a esse grupo;\\
-    \textbf{(b)} Atribua cada observação ao grupo, cujo tem o centróide
+    \textbf{(b)} Atribua cada observação ao grupo, cujo tem o centroide
      mais próximo, a proximidade é dada distância euclidiana entre o
-     centróide e o vetor de variáveis da observação
+     centroide e o vetor de variáveis da observação
   }
 \end{algorithm}
 \vspace{0.5cm}
@@ -399,7 +421,7 @@ um $k$. Para maiores informações sobre o algoritmo consulte
 
 As análises presentes nesse artigo são todas realizadas no _software_ R
 (versão `r with(R.version, paste0(major, ".", minor))`) e estão
-disponíveis no sitío eletrônico do autor
+disponíveis no sítio eletrônico do autor
 <https://jreduardo.github.io/lce5859-mem/>.
 
 # Resultados e discussão #
@@ -645,7 +667,7 @@ criados pelos organizadores do evento são muito mais do que o necessário
 para agrupar artigos similares.
 
 Os `r kchoosen` grupos formados pelo algoritmo k-means contém
-`r narticles` elementos (respectivamente). Para permitir a intepretação
+`r narticles` elementos (respectivamente). Para permitir a interpretação
 dos grupos, exibi-se na \autoref{fig:wordcloud-groups} os 5\% termos
 mais frequentes em cada grupo. Note que o Grupo `r which.max(narticles)`
 é formado por um número de artigos muito maior que os demais, o que
@@ -705,7 +727,7 @@ random_da <- data_agrup[unlist(index), c("group", "title")]
 
 Como resultado complementar, são apresentados na \autoref{tab:amostra}
 os títulos de dois artigos escolhidos aleatoriamente de cada um dos
-grupos formados. Pode se obsrevar que os títulos apresentados condizem
+grupos formados. Pode se observar que os títulos apresentados condizem
 com a representação dos grupos realizada na
 \autoref{fig:wordcloud-groups}. Porém vale ressaltar que o título
 somente uma pequena parte do conjunto de textos que caracterizam o
@@ -745,7 +767,7 @@ Nesse artigo foram apresentados os procedimentos para extração de dados
 textuais de páginas web, nomeadamente, os títulos e resumos dos artigos
 apresentados na _22nd SIGKDD Conference_. Foram `r npa` páginas
 consultadas e `r nar` artigos, cujo título e resumos foram
-extraídos. Após pré-processamento os `r nar` artigos forneceram `r nx`
+extraídos. Após pré-processamento os `r nar` artigos forneceram `r px`
 termos distintos. A coleção de `r nar` artigos, organizada em uma matriz
 termo-documento, de dimensão `r nx` $\times$ `r px` foi submetida a uma
 análise de componentes principais onde `r ni` componentes foram retidas
@@ -756,7 +778,7 @@ análises de agrupamento por _k-means_ para $k$'s de 2
 a 15. Verificou-se, pela estatística de Gap, que o número de grupos
 adequado a esses dados são `r kchoosen`, muito menor do que os `r nto`
 tópicos definidos pelo evento. A avaliação dos grupos mostrou
-que o argrupamento conseguiu juntar artigos com conteúdos similares
+que o agrupamento conseguiu juntar artigos com conteúdos similares
 podendo nomear esses grupos como
 \vspace{-0.2cm}
 
@@ -783,7 +805,7 @@ ser replicadas com a devida adequação.
 
 Como pesquisas decorrentes desse trabalho sugere-se uma abordagem
 probabilística para definição dos temas, @Blei2012 apresenta alguns
-modelos de probabísticos de tópicos que podem auxiliar na formação dos
+modelos de probabilísticos de tópicos que podem auxiliar na formação dos
 temas, em especial o modelo de alocação latente de Dirichlet parece
 satisfazer o objetivo formulado nesse artigo.
 
