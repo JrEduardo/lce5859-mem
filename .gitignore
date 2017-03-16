@@ -1,0 +1,26 @@
+.Rhistory
+*_cache/*
+*_files/*
+*.bib.bak
+
+# Ignore tex output files
+*.ilg
+*.ind
+*.lof
+*.lot
+*.aux
+*.log
+*.out
+*.nav
+*.toc
+*.tex.bak
+*.snm
+*.synctex.gz
+*.bbl
+*.blg
+*.brf
+*.idx
+*~
+.#*
+#*
+*.dvi
