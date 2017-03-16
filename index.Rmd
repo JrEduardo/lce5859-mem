@@ -1,0 +1,54 @@
+---
+title: "Métodos Estatísticos Multivariados"
+subtitle: "Disciplina LCE5859 da pós-graduação em Estatística na ESALQ-USP"
+output: html_document
+---
+
+Página dedicada ao armazenamento e disponibilização dos materiais
+elaborados na disciplina
+[LCE5859 - Métodos Estatísticos Multivariados][lce5859], ofertada pelo
+departamento de Ciências Exatas (LCE) da Escola Superior de Agricultura
+"Luiz de Queiroz" ESALQ - Universidade de São Paulo, como curso de verão
+do Programa de Pós-Graduação em Estatística e Experimentação
+Agronômica.
+
+A disciplina foi ministrada pelo ministrada pelo professor
+[Carlos Tadeu dos Santos Dias][carlos] e têm-se como base o livro
+[Métodos Estatísticos Multivariados: uma introdução][livro] do autor
+Brian F. J. Manly.
+
+As atividades complementares às aulas ministradas pelo docente são i)
+resolução dos exercícios propostos ao final de capítulo do livro-texto;
+e ii) Aplicação de técnicas estatísticas multivariadas em um problema
+real, transcrito em formato de artigo científico. Abaixo são
+apresentados os links dos trabalhos elaborados
+
+***
+
+* **Exercícios** ([PDF](./exercises.pdf) / [RCode](./exercises.R)) -
+  Resolução dos exercícios proposto no livro-texto.
+
+***
+
+* **Artigo** ([PDF](./article.pdf) / [RCode](./article.R)) - Aplicação
+  das técnicas estatísticas multivariadas em problema real (_Análise de
+  agrupamento aplicada aos resumos dos papers apresentados no evento
+  SIGKDD2016_).
+
+***
+
+Para sugestões, críticas ou relato de problemas abra uma _issue_ em
+[htps://github.com/JrEduardo/lce5859-mem/issues](https://github.com/JrEduardo/lce5859-mem/issues)
+ou entre em contato por e-mail [edujrrib@gmail.com](mailto:edujrrib@gmail.com)
+
+## Licença ##
+
+Este material é distribuído sob a licença
+[GNU General Public License, versão 3], descrita no arquivo
+[`LICENSE.md`], © 2016 E. E., Ribeiro Jr
+
+[lce5859]: http://www.esalq.usp.br/pg/programas/estatistica/informacoes-academicas/disciplina/detalhe?sgldis=LCE5859&tipo=PG
+[carlos]: http://www.lce.esalq.usp.br/tadeu.html
+[livro]: http://www.fnac.pt/Metodos-Estatisticos-Multivariados-Bryan-J-F-Manly/a665345
+[GNU General Public License, versão 3]: https://www.gnu.org/licenses/gpl-3.0.html
+[`LICENSE.md`]: https://github.com/JrEduardo/lce5859-mem/blob/master/LICENSE.md
